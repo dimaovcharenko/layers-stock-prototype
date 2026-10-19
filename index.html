@@ -1,0 +1,733 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>The Layers · Stock — clickable prototype</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:Inter,"Noto Sans",sans-serif;background:#eef0f3;color:#1c1c1e;padding:36px 40px 40px;width:1700px}
+h1{font-size:26px;font-weight:700;letter-spacing:-.3px}
+.sub{color:#6b7280;font-size:15px;margin-top:6px}
+.grid{display:grid;grid-template-columns:repeat(4,370px);gap:34px 44px;margin-top:28px}
+.cell .cap{font-size:16px;font-weight:600;margin:0 0 10px 6px;color:#111}
+.cap b{display:inline-block;width:26px;height:26px;border-radius:50%;background:#2AABEE;color:#fff;text-align:center;line-height:26px;font-size:14px;margin-right:8px}
+.phone{width:370px;height:790px;border-radius:44px;background:#111;padding:9px;box-shadow:0 18px 40px rgba(0,0,0,.18)}
+.scr{width:352px;height:772px;border-radius:36px;overflow:hidden;background:#fff;position:relative;display:flex;flex-direction:column}
+.status{height:34px;display:flex;justify-content:space-between;align-items:center;padding:4px 26px 0;font-size:13px;font-weight:600;flex:none}
+/* mini app top bar */
+.tgbar{height:46px;display:flex;align-items:center;justify-content:space-between;padding:0 14px;border-bottom:1px solid #eceef1;flex:none;background:#fff}
+.tgbar .close{color:#2AABEE;font-size:15px;font-weight:500}
+.tgbar .title{font-weight:700;font-size:16px}
+.tgbar .title small{display:block;font-size:11px;color:#8e8e93;font-weight:500;text-align:center}
+.tgbar .dots{color:#2AABEE;font-size:20px;letter-spacing:1px}
+.app{flex:1;overflow:hidden;background:#f4f5f7;position:relative}
+.pad{padding:14px}
+.row{display:flex;align-items:center;justify-content:space-between}
+.lang{display:flex;background:#e6e8ec;border-radius:10px;padding:3px}
+.lang span{font-size:12px;font-weight:600;padding:5px 10px;border-radius:8px;color:#6b7280}
+.lang span.on{background:#fff;color:#111;box-shadow:0 1px 2px rgba(0,0,0,.12)}
+.hello{font-size:21px;font-weight:700}
+.muted{color:#8e8e93;font-size:13px}
+.card{background:#fff;border-radius:16px;padding:14px;margin-top:12px;box-shadow:0 1px 2px rgba(0,0,0,.05)}
+.card h3{font-size:16px;font-weight:700}
+.badge{font-size:11px;font-weight:700;padding:3px 8px;border-radius:20px;background:#e3f4fd;color:#1689c6}
+.badge.green{background:#e3f7ea;color:#1f9d55}
+.badge.amber{background:#fff4dc;color:#b7791f}
+.chips{display:flex;gap:6px;margin-top:10px;flex-wrap:wrap}
+.chip{font-size:12px;background:#f1f3f6;border-radius:8px;padding:4px 8px;color:#444}
+.cta{display:block;text-align:center;background:#2AABEE;color:#fff;font-weight:700;border-radius:12px;padding:12px;font-size:15px;margin-top:12px}
+.cta.ghost{background:#eef7fd;color:#1689c6}
+.bar{height:6px;background:#e6e8ec;border-radius:4px;overflow:hidden;margin-top:10px}
+.bar i{display:block;height:100%;background:#2AABEE;border-radius:4px}
+/* count screen */
+.head2{background:#fff;padding:10px 14px 0;border-bottom:1px solid #eceef1}
+.tabs{display:flex;gap:18px;margin-top:10px}
+.tabs span{font-size:14px;font-weight:600;color:#8e8e93;padding:8px 0 9px;border-bottom:2px solid transparent}
+.tabs span.on{color:#111;border-color:#2AABEE}
+.tabs em{font-style:normal;font-size:11px;color:#8e8e93;font-weight:600;margin-left:3px}
+.colh{display:grid;grid-template-columns:1fr 58px 58px;gap:8px;padding:8px 14px 4px;font-size:11px;color:#8e8e93;font-weight:600;text-transform:uppercase;letter-spacing:.3px}
+.colh span:not(:first-child){text-align:center}
+.item{display:grid;grid-template-columns:1fr 58px 58px;gap:8px;align-items:center;background:#fff;padding:9px 14px;border-bottom:1px solid #f0f1f3}
+.item .n{font-size:14px;font-weight:600;line-height:1.2}
+.item .pt{font-size:11.5px;color:#8e8e93;margin-top:1px}
+.item .meta{font-size:11px;color:#8e8e93;margin-top:3px}
+.item .meta .min{color:#b7791f;font-weight:600}
+.item .meta .low{color:#e5484d;font-weight:700}
+.in{height:38px;border:1.5px solid #e1e4e8;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:600;background:#fafbfc}
+.in.empty{color:#c2c6cc;font-weight:500}
+.in.focus{border-color:#2AABEE;background:#fff;box-shadow:0 0 0 3px rgba(42,171,238,.15)}
+.in.red{border-color:#f3b4b6;color:#e5484d;background:#fff6f6}
+.in.ord{background:#eef7fd;border-color:#cfe9f8;color:#1689c6}
+.zone{display:flex;justify-content:space-between;align-items:center;background:#fff;margin-top:8px;padding:12px 14px;font-weight:700;font-size:14px}
+.zone small{font-weight:500;color:#8e8e93;font-size:12px}
+.foot{position:absolute;left:0;right:0;bottom:0;background:#fff;border-top:1px solid #eceef1;padding:10px 14px 22px}
+.foot .row{font-size:13px;font-weight:600}
+.cursor{display:inline-block;width:1.5px;height:18px;background:#2AABEE;margin-left:1px}
+/* chat */
+.chathead{height:52px;display:flex;align-items:center;gap:10px;padding:0 12px;background:#fff;border-bottom:1px solid #e4e6ea;flex:none}
+.back{color:#2AABEE;font-size:22px;width:16px}
+.ava{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#7b5e3b,#c49a6c);color:#fff;font-weight:800;display:flex;align-items:center;justify-content:center;font-size:14px;flex:none}
+.chathead .t{font-weight:700;font-size:15px}
+.chathead .s{font-size:12px;color:#8e8e93}
+.chat{flex:1;background:radial-gradient(circle at 20% 20%,#e6eed6 0,transparent 40%),radial-gradient(circle at 80% 70%,#c9d8b4 0,transparent 45%),#d6e2c4;padding:10px 10px;overflow:hidden;display:flex;flex-direction:column;gap:6px}
+.chat.bottom{justify-content:flex-end}
+.day{align-self:center;background:rgba(0,0,0,.18);color:#fff;font-size:11.5px;font-weight:600;padding:3px 10px;border-radius:12px;margin:2px 0}
+.msg{max-width:300px;background:#fff;border-radius:14px 14px 14px 4px;padding:8px 11px 6px;font-size:13.5px;line-height:1.38;align-self:flex-start;box-shadow:0 1px 1px rgba(0,0,0,.08)}
+.msg.out{align-self:flex-end;background:#effdde;border-radius:14px 14px 4px 14px}
+.msg .tm{font-size:10.5px;color:#9aa0a6;text-align:right;margin-top:2px}
+.msg.out .tm{color:#5fb15a}
+.msg .zh{font-size:11.5px;font-weight:700;color:#1689c6;margin-top:6px;letter-spacing:.3px}
+.msg .li{display:flex;justify-content:space-between;gap:8px}
+.msg .li span:last-child{white-space:nowrap;font-variant-numeric:tabular-nums}
+.msg .warn{color:#e5484d}
+.msg hr{border:none;border-top:1px solid #edf0f2;margin:6px 0}
+.kb{display:grid;gap:4px;max-width:300px;width:300px;align-self:flex-start;margin-top:-2px}
+.kb.c2{grid-template-columns:1fr 1fr}
+.kb span{background:rgba(70,90,60,.32);color:#fff;font-weight:600;font-size:13px;text-align:center;padding:9px 6px;border-radius:10px;backdrop-filter:blur(2px)}
+.kb span.sel{background:rgba(42,171,238,.85)}
+.kb span.full{grid-column:1/-1}
+.kb span.dim{opacity:.55}
+.quote{border-left:3px solid #2AABEE;background:#eef7fd;padding:5px 8px;border-radius:6px;font-size:12.5px;margin:4px 0}
+.status-line{font-size:12.5px;font-weight:600;color:#1f9d55;margin-top:4px}
+.input{height:48px;background:#fff;border-top:1px solid #e4e6ea;display:flex;align-items:center;padding:0 12px;gap:10px;color:#a0a4aa;font-size:14px;flex:none}
+.input .f{flex:1;border-radius:18px;background:#f1f3f6;padding:8px 12px}
+/* recount */
+.banner{background:#fff8e6;border:1px solid #f6dfa4;border-radius:14px;padding:11px 12px;margin:12px 14px 4px}
+.banner h4{font-size:14px;font-weight:700;color:#8a5a00}
+.banner p{font-size:12.5px;color:#6b5a2e;margin-top:4px;line-height:1.35}
+.item.flag{background:#fffaf0;box-shadow:inset 4px 0 0 #f5a623}
+.was{font-size:11px;color:#b7791f;font-weight:600;margin-top:3px}
+.item.ok{opacity:.45}
+.notes{background:#fff;border-radius:22px;padding:20px;height:790px;margin-top:36px;box-shadow:0 8px 24px rgba(0,0,0,.06);font-size:13px;line-height:1.45;overflow:hidden}
+.notes h3{font-size:17px;margin-bottom:10px}
+.notes ul{padding-left:18px}
+.notes li{margin-bottom:6px}
+.notes .tag{display:inline-block;font-size:12px;font-weight:700;background:#fff4dc;color:#b7791f;padding:3px 9px;border-radius:20px;margin-bottom:12px}
+.colh.one,.item.one{grid-template-columns:1fr 76px}
+/* order form */
+.ohead{background:#fff;padding:10px 14px;border-bottom:1px solid #eceef1;font-size:12.5px;color:#6b7280;line-height:1.4}
+.ohead b{color:#111;font-size:15px}
+.sup{display:flex;justify-content:space-between;align-items:center;background:#fff;margin-top:5px;padding:9px 14px;border-bottom:1px solid #f0f1f3}
+.sup .sn{font-weight:700;font-size:14px}
+.sup .sd{font-size:11px;color:#8e8e93;margin-top:1px}
+.sup .car{color:#8e8e93;font-size:13px;font-weight:600;white-space:nowrap}
+.sup.closed{border-bottom:none}
+.oi{display:grid;grid-template-columns:1fr 112px;gap:8px;align-items:center;background:#fff;padding:6px 14px;border-bottom:1px solid #f0f1f3}
+.oi .n{font-size:13.5px;font-weight:600;line-height:1.2}
+.oi .meta{font-size:11px;color:#8e8e93;margin-top:2px}
+.oi .meta .low{color:#e5484d;font-weight:700}
+.oi.lowrow{background:#fff6f6;box-shadow:inset 4px 0 0 #e5484d}
+.oi.zero .n{color:#9aa0a6}
+.step{display:grid;grid-template-columns:30px 1fr 30px;height:34px;border:1.5px solid #e1e4e8;border-radius:10px;overflow:hidden;background:#fafbfc}
+.step span{display:flex;align-items:center;justify-content:center;font-weight:600}
+.step span:first-child,.step span:last-child{color:#2AABEE;font-size:18px;background:#f1f6fa}
+.step span:nth-child(2){font-size:15px;color:#1689c6}
+.step.focus{border-color:#2AABEE;box-shadow:0 0 0 3px rgba(42,171,238,.15);background:#fff}
+.oi.zero .step span:nth-child(2){color:#c2c6cc}
+.more{background:#fff;padding:7px 14px;font-size:12px;color:#2AABEE;font-weight:600;border-bottom:1px solid #f0f1f3}
+.toast{position:absolute;left:50%;transform:translateX(-50%);top:98px;background:rgba(30,30,30,.86);color:#fff;font-size:12.5px;padding:7px 14px;border-radius:16px;white-space:nowrap}
+.rkb{background:#f6f7f9;border-top:1px solid #e4e6ea;padding:8px 8px 6px;flex:none}
+.rkb span{display:block;background:#fff;border-radius:10px;text-align:center;padding:12px;font-weight:600;font-size:14.5px;color:#1c1c1e;box-shadow:0 1px 1px rgba(0,0,0,.15)}
+.rkb small{display:block;text-align:center;font-size:11px;color:#8e8e93;margin-top:6px}
+.contact{display:flex;gap:9px;align-items:center}
+.contact .ava{width:40px;height:40px;background:linear-gradient(135deg,#f093a8,#e5484d)}
+.step.empty span:nth-child(2){color:#c2c6cc;font-weight:500}
+.notes{grid-column:span 2;column-count:2;column-gap:30px;font-size:14px}
+.notes h3{break-after:avoid}
+.notes li{break-inside:avoid}
+.seg{display:flex;background:#e6e8ec;border-radius:10px;padding:3px;margin-top:12px}
+.seg span{flex:1;text-align:center;font-size:13px;font-weight:600;padding:7px 0;border-radius:8px;color:#6b7280}
+.seg span.on{background:#fff;color:#111;box-shadow:0 1px 2px rgba(0,0,0,.12)}
+.seg em{font-style:normal;background:#e5484d;color:#fff;font-size:10.5px;border-radius:9px;padding:1px 6px;margin-left:4px}
+.lock{font-size:11.5px;color:#8e8e93;margin-top:8px}
+.rv{display:grid;grid-template-columns:24px 1fr auto;gap:8px;align-items:center;background:#fff;padding:7px 14px;border-bottom:1px solid #f0f1f3;font-size:13.5px}
+.rv .cb{width:20px;height:20px;border-radius:6px;border:1.5px solid #c9cdd3;display:flex;align-items:center;justify-content:center;font-size:12px;color:#fff;font-weight:800}
+.rv.on{background:#fffaf0;box-shadow:inset 4px 0 0 #f5a623}
+.rv.on .cb{background:#f5a623;border-color:#f5a623}
+.rv .v{font-weight:700;font-variant-numeric:tabular-nums;white-space:nowrap}
+.rv .v small{font-weight:500;color:#8e8e93}
+.rv .w{color:#e5484d;font-size:11px;font-weight:700}
+.sh{font-size:11px;font-weight:700;color:#1689c6;letter-spacing:.3px;padding:8px 14px 4px;background:#f4f5f7}
+.cmt{background:#fff;border:1.5px solid #e1e4e8;border-radius:10px;padding:8px 10px;font-size:13px;color:#333;line-height:1.35}
+.who{display:flex;gap:6px;margin-top:7px;flex-wrap:wrap}
+.who span{font-size:12px;font-weight:600;border-radius:16px;padding:5px 10px;background:#f1f3f6;color:#444}
+.who span.on{background:#2AABEE;color:#fff}
+.btn2{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:9px}
+.btn2 .cta{margin-top:0;padding:11px 6px;font-size:14px}
+
+body{width:auto!important;padding:0!important;margin:0;background:#eef0f3}
+[data-act]{cursor:pointer;user-select:none}
+.topbar{display:flex;align-items:center;gap:12px;padding:10px 24px;background:#fff;border-bottom:1px solid #e4e6ea;position:sticky;top:0;z-index:5;flex-wrap:wrap}
+.proto-banner{background:#fff4dc;color:#8a5a00;font-weight:700;font-size:13px;padding:6px 12px;border-radius:20px}
+.roles{display:flex;gap:6px;flex-wrap:wrap}
+.roles button{font:inherit;font-size:13px;font-weight:600;border:1.5px solid #dfe3e8;background:#fff;border-radius:20px;padding:6px 12px;cursor:pointer;color:#333}
+.roles button.on{background:#2AABEE;border-color:#2AABEE;color:#fff}
+.roles .ub{background:#e5484d;color:#fff;border-radius:9px;font-size:10.5px;padding:1px 6px;margin-left:6px}
+.main{display:grid;grid-template-columns:280px 370px minmax(420px,1fr);gap:26px;padding:20px 24px;align-items:start}
+.panel{background:#fff;border-radius:18px;padding:16px;box-shadow:0 8px 24px rgba(0,0,0,.06);font-size:13.5px}
+.panel h3{font-size:16px}
+.steps{list-style:none;margin-top:12px}
+.steps li{display:flex;gap:9px;padding:6px 8px;border-radius:10px;align-items:flex-start;line-height:1.3}
+.steps li small{display:block;color:#8e8e93;font-size:11px}
+.steps li .sn{flex:none;width:22px;height:22px;border-radius:50%;background:#e6e8ec;color:#555;font-size:11.5px;font-weight:700;display:flex;align-items:center;justify-content:center}
+.steps li.done{color:#9aa0a6}.steps li.done .sn{background:#e3f7ea;color:#1f9d55}
+.steps li.cur{background:#e3f4fd;color:#111;font-weight:600}.steps li.cur .sn{background:#2AABEE;color:#fff}
+.hint{margin-top:10px;background:#fff8e6;border:1px solid #f6dfa4;border-radius:12px;padding:10px;font-size:13px;line-height:1.4}
+.pill{display:inline-block;border:1.5px solid #dfe3e8;border-radius:16px;padding:5px 12px;font-weight:600;font-size:12.5px}
+.phonewrap{position:sticky;top:76px}
+.app{display:flex;flex-direction:column}
+.scroll{flex:1;overflow:auto;min-height:0}
+.foot{position:static!important;flex:none}
+.chat{overflow-y:auto!important;justify-content:flex-start!important}
+.chat>:first-child{margin-top:auto}
+.chat>*{flex:none}
+.kb.c3{grid-template-columns:1fr 1fr 1fr}
+.kb span{cursor:pointer}
+.sm{font-size:12.5px}
+input.in{width:100%;font:inherit;font-size:16px;font-weight:600;text-align:center;outline:none;color:#1c1c1e}
+input.in::placeholder{color:#c2c6cc;font-weight:500}
+input.in:focus{border-color:#2AABEE;background:#fff;box-shadow:0 0 0 3px rgba(42,171,238,.15)}
+input.in.red{border-color:#f3b4b6;color:#e5484d;background:#fff6f6}
+.step input{border:none;background:transparent;text-align:center;width:100%;min-width:0;font:inherit;font-size:15px;font-weight:600;color:#1689c6;outline:none}
+.step input::placeholder{color:#c2c6cc;font-weight:500}
+.step:focus-within{border-color:#2AABEE;box-shadow:0 0 0 3px rgba(42,171,238,.15);background:#fff}
+.cta.dis{background:#c7d3db;cursor:default}
+.exl{text-align:center;margin-top:7px;font-size:12px;color:#2AABEE;font-weight:600}
+.startbar{background:#fff;border-top:1px solid #e4e6ea;flex:none}
+.startbar span{display:block;text-align:center;color:#2AABEE;font-weight:700;padding:14px;letter-spacing:.5px}
+.input .menu{background:#2AABEE;color:#fff;font-size:12px;font-weight:700;border-radius:14px;padding:5px 9px;white-space:nowrap}
+.chatin{flex:1;border:none;border-radius:18px;background:#f1f3f6;padding:8px 12px;font:inherit;font-size:14px;outline:none;min-width:0}
+.sendb{color:#2AABEE;font-size:20px}
+textarea.cmt{width:100%;resize:none;font:inherit;font-size:13px;outline:none}
+textarea.cmt:focus{border-color:#2AABEE}
+.who span{cursor:pointer}
+.stabs{display:flex;gap:4px;border-bottom:1px solid #e3e6ea}
+.stabs span{padding:7px 12px;font-weight:600;font-size:12.5px;color:#6b7280;border:1px solid transparent;border-bottom:none;border-radius:8px 8px 0 0;position:relative}
+.stabs span.on{background:#f1f8f3;color:#1e6b3a;border-color:#e3e6ea}
+.stabs em{font-style:normal;color:#9aa0a6;font-size:11px}
+.stabs .dot{position:absolute;top:4px;right:3px;width:7px;height:7px;border-radius:50%;background:#1f9d55}
+.sheetwrap{overflow:auto;max-height:690px;margin-top:8px}
+.sheetwrap table{border-collapse:collapse;font-size:11.5px;width:100%;font-family:Arial,sans-serif}
+.sheetwrap th,.sheetwrap td{border:1px solid #e3e6ea;padding:4px 6px;text-align:left;white-space:nowrap}
+.sheetwrap th{background:#f1f3f6;position:sticky;top:0}
+.sheetwrap td{max-width:340px;overflow:hidden;text-overflow:ellipsis}
+.sheetwrap tr.new td{background:#e3f7ea}
+.toastg{position:fixed;bottom:28px;left:50%;transform:translateX(-50%) translateY(20px);background:rgba(30,30,30,.9);color:#fff;font-size:13.5px;padding:9px 16px;border-radius:18px;opacity:0;transition:.2s;pointer-events:none;z-index:20;max-width:520px;text-align:center}
+.toastg.on{opacity:1;transform:translateX(-50%)}
+.sup{cursor:pointer}
+</style></head><body>
+<div class="topbar" id="top"></div>
+<div class="main">
+ <div class="panel" id="steps"></div>
+ <div class="phonewrap"><div class="phone" id="phone"><div class="scr" id="scr"></div></div></div>
+ <div class="panel" id="sheet"></div>
+</div>
+<div class="toastg" id="toast"></div>
+<script>
+const L={en:{
+banner:"Prototype · example data, nothing is sent",story:"Story",progress:"{0} / 14 steps",reset:"↺ Reset",next:"Next:",alldone:"Story complete 🎉 Check the Sheet panel on the right.",
+r_ana:"Barista · Ana",r_nazar:"Responsible · Nazar",r_maryna:"Responsible · Maryna",r_dmytro:"Admin · Dmytro",lang_app:"App language",viewing:"Viewing as",
+chat_of:"bot · {0}'s chat",admin_sfx:" (admin)",message:"Message",app_btn:"☰ App",start:"START",
+welcome_t:"👋 Welcome to The Layers · Stock!",welcome_b:"This bot is for the café team: stock counts and orders.",welcome_c:"To get access, tap <b>📱 Share contact</b> below. The admin will check it's you and approve.",
+share:"📱 Share contact",share_note:"Only your name and phone are shared.",thanks:"🙏 Thanks, Ana! Waiting for approval ⏳",thanks_b:"I'll message you as soon as the admin confirms.",
+newstaff:"👤 New staff wants access",approve:"✅ Approve",reject:"❌ Reject",approved_by_you:"✅ Approved by you · {0}",rejected_by_you:"❌ Rejected by you · {0}",
+role_q:"What's Ana's role?",role_note:"Responsible = reviews counts and orders for their suppliers.",barista:"☕ Barista",cook:"🍳 Cook",responsible:"🧾 Responsible",
+added:"✅ <b>Ana Silva</b> added as <b>{0}</b>.",added_b:"Saved to the “Staff” tab · Ana has been notified.",
+approved_t:"✅ You're approved, Ana!",approved_b:"Role: <b>{0}</b>. Open the app to do stock counts. Your name is filled in automatically, so you don't pick yourself from a list.",open_app:"📲 Open app",
+rejected_t:"Your request was declined. Talk to the manager and share your contact again.",noaccess:"No access yet: share your contact in the bot first.",
+hi:"Hi, {0} 👋",today:"Sunday, 25 Oct",ro_barista:"Barista",ro_cook:"Cook",ro_responsible:"Responsible",ro_admin:"Admin",
+tab_count:"Count",tab_review:"Review",tab_orders:"Orders",tab_staff:"Staff",lock:"🔒 Visible only to responsibles and the admin. Baristas don't see this tab.",
+sun:"☀️ Sunday count",wed:"🌤 Wednesday count",sat:"🍷 Saturday wine",before11:"Today · before 11:00",sun_meta:"{0} items · reviewed by Nazar & Maryna, each for their suppliers",
+wed_meta:"desserts, milk, packaging",sat_meta:"bottles · goes to Eugene",start_count:"Start count",continue_count:"Continue count · {0}/{1}",not_today:"Not today: this prototype has only the Sunday count.",
+last_count:"Last count",acc_badge:"✅ Accepted",st_pending:"⏳ {0}: waiting",st_recount:"🔁 {0}: recount",st_accepted:"✅ {0}: accepted",
+by_baristas:"Counts are done by the barista on shift. You review your suppliers' part in the Review tab.",
+zone_bar:"Bar",zone_kitchen:"Kitchen",zone_storage:"Storage",col_item:"Item",col_left:"Left",min:"Min {0}",below:"below min",
+filled:"{0} / {1} filled",left_n:"{0} left",submit:"Submit count",fill_all:"Fill all items to submit",fill_ex:"⚡ Fill example values",
+sent_review_t:"📤 Your <b>Sunday count</b> was sent for review:",items_for:"{0}: {1} items",thanks_ana:"Thanks, Ana!",sent_toast:"Count submitted. Nazar and Maryna got their parts.",
+rv_t:"📦 Sunday count: your items to review",rv_t2:"🔄 {0} resubmitted the Sunday count",below_n:"⚠️ {0} below min",changed:"CHANGED",unchanged:"Other {0} of your items unchanged",more_items:"+ {0} more · tap “Show all”",
+accept:"✅ Accept",ask_rc:"🔁 Ask to recount",show_all:"📋 Show all {0} items",show_less:"📋 Show less",superseded:"Superseded by the recount below",rc_to:"🔁 Recount requested · {0}",
+rc_q:"🔁 What should be recounted?",rc_q_b:"Tap the items, then “Next”.",next_btn:"Next: comment ›",pick_one:"Tap at least one item",selected:"Selected: {0}",
+rc_cmt:"💬 Type a short comment for the barista below, or skip.",skip:"Skip comment",type_cmt:"Type a comment…",send:"➤",
+who_q:"Who should recount?",who_b:"{0} counted it · on shift now: {1}",counted:"counted",send_req:"📤 Send request",
+rc_sent:"✉️ Sent to {0}: <b>{1} items</b> to recount.",not_emul:"{0}'s phone isn't emulated here. Send it to Ana to continue the story.",
+push_t:"🔁 {0} asked you to recount {1} items",open_count:"📝 Open count",
+acc_t:"✅ Count accepted and saved",acc_b:"Sunday count 25.10 → Google Sheet",acc_c:"“Sun count” tab · who counted, who accepted, changes",acc_d:"Ana has been notified 👍",acc_e:"🛒 Ready to order? Your suppliers: <b>{0}</b>",make_order:"🛒 Make order",edit_order:"✏️ Edit order",
+acc_notify:"👍 {0} accepted your Sunday count. Thanks!",back_sent:"📤 Recount sent back to {0}. Thanks!",
+rc_by:"🔁 Recount requested by {0}",to_recount:"To recount · {0}",was:"was {0}",other_items:"Other items",already:"· {0}, already counted",rechecked:"{0} / {1} rechecked",ready:"Ready",resubmit:"Resubmit count",
+open_rc:"Open recount",rc_card:"🔁 Recount requested by {0} · {1} items",wait_you:"Waiting for you",recent:"Recent",open_review:"Open review",nothing_review:"Nothing to review yet. When a barista submits a count, it appears here.",
+of_your:"{0} of your items",part_of:"{0}'s part",rv_title:"Review · Sunday count",send_to:"Send recount ({0} items) to",on_shift:"· on shift now",comment_ph:"Comment for the barista…",send_rc:"🔁 Send for recount",after_accept:"After Accept: 🛒 Make order",accepted_line:"✅ Accepted by {0} · {1}",
+order_title:"🛒 Order · 25 Oct",order_hint:"Type how many to order · empty = don't order · low stock on top",items_n:"{0} items",filled_n:"{0} filled",show_more:"Show {0} more ›",show_less2:"Show less ‹",left_min:"left {0} · min {1}",
+filled_sum:"Filled: {0}",empty_skip:"empty rows are skipped",save_order:"Save order · {0} items",nothing_filled:"Type at least one quantity",
+os_t:"✅ Order saved to Google Sheet",os_meta:"👤 {0} · 🕚 25.10, {1} · “Orders” tab",os_note:"Not sent to suppliers. Copy the text and send it the usual way.",copy_for:"📋 Copy for {0}",copied:"✓ {0} order copied to clipboard",
+orders_none:"No orders yet. Accept a count first, then tap “Make order”.",saved_orders:"Saved orders",pending_req:"Pending request",staff_list:"Team",
+sheet_title:"Google Sheet · “Layers stock and orders” (simulated)",sh_empty:"No rows yet.",sh_note:"Green rows were just written.",
+u_cartons:"cartons",u_bottles:"bottles",u_cans:"cans",u_bags:"bags",u_packs:"packs",u_pcs:"pcs",u_bunches:"bunches",u_kg:"kg",u_rolls:"rolls",
+s1:"Ana: /start + share contact",h1:"Ana's chat: tap START, then “📱 Share contact”.",s2:"Dmytro approves + picks a role",h2:"Dmytro's chat: tap “Approve”, then a role.",
+s3:"Ana is approved → opens the app",h3:"Ana's chat: tap “📲 Open app”.",s4:"Ana chooses the Sunday count",h4:"In the app: tap “Start count”.",
+s5:"Ana enters stock levels and submits",h5:"Type levels in all 3 zones (or ⚡ Fill example values), then Submit.",s6:"Nazar gets only his suppliers' items",h6:"Switch to Nazar: the bot message lists only his items.",
+s7:"Nazar asks to recount (items, comment, who)",h7:"Tap “Ask to recount”, pick items, Next, type a comment, keep Ana, Send.",s8:"Maryna opens the Review tab",h8:"Maryna: ☰ App → Review → Open review.",
+s9:"Maryna flags items or accepts in the app",h9:"Tick items + comment + Send for recount, or tap Accept.",s10:"Ana gets a push → opens the count",h10:"Ana's chat: tap “📝 Open count”.",
+s11:"Ana recounts and resubmits",h11:"Fix the highlighted items and tap Resubmit.",s12:"Nazar accepts → Make order",h12:"Nazar's chat: tap “Accept” on the resubmitted count.",
+s13:"Nazar fills the order form",h13:"Tap “🛒 Make order”, type quantities or use −/+.",s14:"Order saved → Copy per supplier",h14:"Tap “Save order”, then “📋 Copy for …”."
+},
+pt:{
+r_ana:"Barista · Ana",r_nazar:"Responsável · Nazar",r_maryna:"Responsável · Maryna",r_dmytro:"Admin · Dmytro",lang_app:"Idioma da app",viewing:"Ver como",
+chat_of:"bot · chat de {0}",message:"Mensagem",app_btn:"☰ App",start:"INICIAR",
+welcome_t:"👋 Bem-vinda ao The Layers · Stock!",welcome_b:"Este bot é para a equipa do café: contagens de stock e encomendas.",welcome_c:"Para ter acesso, toca em <b>📱 Partilhar contacto</b> abaixo. O admin confirma que és tu.",
+share:"📱 Partilhar contacto",share_note:"Só o teu nome e telefone são partilhados.",thanks:"🙏 Obrigado, Ana! À espera de aprovação ⏳",thanks_b:"Aviso-te assim que o admin confirmar.",
+newstaff:"👤 Novo funcionário pede acesso",approve:"✅ Aprovar",reject:"❌ Recusar",approved_by_you:"✅ Aprovado por ti · {0}",rejected_by_you:"❌ Recusado por ti · {0}",
+role_q:"Qual é a função da Ana?",role_note:"Responsável = revê contagens e encomenda aos seus fornecedores.",barista:"☕ Barista",cook:"🍳 Cozinheiro",responsible:"🧾 Responsável",
+added:"✅ <b>Ana Silva</b> adicionada como <b>{0}</b>.",added_b:"Guardado no separador “Staff” · A Ana foi avisada.",
+approved_t:"✅ Estás aprovada, Ana!",approved_b:"Função: <b>{0}</b>. Abre a app para fazer contagens. O teu nome é preenchido automaticamente.",open_app:"📲 Abrir app",
+rejected_t:"O teu pedido foi recusado. Fala com o gerente e partilha o contacto de novo.",noaccess:"Ainda sem acesso: partilha o teu contacto no bot primeiro.",
+hi:"Olá, {0} 👋",today:"Domingo, 25 out",ro_barista:"Barista",ro_cook:"Cozinheiro",ro_responsible:"Responsável",ro_admin:"Admin",
+tab_count:"Contagem",tab_review:"Revisão",tab_orders:"Encomendas",tab_staff:"Equipa",lock:"🔒 Visível só para responsáveis e admin. Os baristas não veem este separador.",
+sun:"☀️ Contagem de domingo",wed:"🌤 Contagem de quarta",sat:"🍷 Vinho de sábado",before11:"Hoje · antes das 11:00",sun_meta:"{0} itens · revistos por Nazar e Maryna, cada um para os seus fornecedores",
+start_count:"Começar contagem",continue_count:"Continuar · {0}/{1}",not_today:"Hoje não: este protótipo só tem a contagem de domingo.",last_count:"Última contagem",acc_badge:"✅ Aceite",
+st_pending:"⏳ {0}: à espera",st_recount:"🔁 {0}: recontagem",st_accepted:"✅ {0}: aceite",by_baristas:"As contagens são feitas pelo barista de turno. Revês a parte dos teus fornecedores em Revisão.",
+zone_bar:"Bar",zone_kitchen:"Cozinha",zone_storage:"Armazém",col_item:"Produto",col_left:"Resta",min:"Mín {0}",below:"abaixo do mín",
+filled:"{0} / {1} preenchidos",left_n:"faltam {0}",submit:"Enviar contagem",fill_all:"Preenche tudo para enviar",fill_ex:"⚡ Preencher exemplo",
+sent_review_t:"📤 A tua <b>contagem de domingo</b> foi enviada para revisão:",items_for:"{0}: {1} itens",thanks_ana:"Obrigado, Ana!",sent_toast:"Contagem enviada. Nazar e Maryna receberam as suas partes.",
+rv_t:"📦 Contagem de domingo: os teus itens para rever",rv_t2:"🔄 {0} reenviou a contagem de domingo",below_n:"⚠️ {0} abaixo do mín",changed:"ALTERADO",unchanged:"Outros {0} itens sem alteração",more_items:"+ {0} mais · toca “Ver tudo”",
+accept:"✅ Aceitar",ask_rc:"🔁 Pedir recontagem",show_all:"📋 Ver todos os {0}",show_less:"📋 Ver menos",superseded:"Substituída pela recontagem abaixo",rc_to:"🔁 Recontagem pedida · {0}",
+rc_q:"🔁 O que deve ser recontado?",rc_q_b:"Toca nos itens e depois em “Seguinte”.",next_btn:"Seguinte: comentário ›",pick_one:"Escolhe pelo menos um item",selected:"Escolhidos: {0}",
+rc_cmt:"💬 Escreve um comentário curto para o barista, ou salta.",skip:"Sem comentário",type_cmt:"Escreve um comentário…",
+who_q:"Quem deve recontar?",who_b:"{0} contou · de turno agora: {1}",counted:"contou",send_req:"📤 Enviar pedido",
+rc_sent:"✉️ Enviado a {0}: <b>{1} itens</b> para recontar.",not_emul:"O telefone de {0} não está emulado. Envia à Ana para continuar.",
+push_t:"🔁 {0} pediu-te para recontar {1} itens",open_count:"📝 Abrir contagem",
+acc_t:"✅ Contagem aceite e guardada",acc_b:"Contagem de domingo 25.10 → Google Sheet",acc_c:"Separador “Sun count” · quem contou, quem aceitou, alterações",acc_d:"A Ana foi avisada 👍",acc_e:"🛒 Pronto para encomendar? Os teus fornecedores: <b>{0}</b>",make_order:"🛒 Fazer encomenda",edit_order:"✏️ Editar encomenda",
+acc_notify:"👍 {0} aceitou a tua contagem de domingo. Obrigado!",back_sent:"📤 Recontagem enviada a {0}. Obrigado!",
+rc_by:"🔁 Recontagem pedida por {0}",to_recount:"Para recontar · {0}",was:"era {0}",other_items:"Outros itens",already:"· {0}, já contados",rechecked:"{0} / {1} verificados",ready:"Pronto",resubmit:"Reenviar contagem",
+open_rc:"Abrir recontagem",rc_card:"🔁 Recontagem pedida por {0} · {1} itens",wait_you:"À tua espera",recent:"Recentes",open_review:"Abrir revisão",nothing_review:"Nada para rever ainda.",
+of_your:"{0} dos teus itens",part_of:"Parte de {0}",rv_title:"Revisão · domingo",send_to:"Enviar recontagem ({0} itens) a",on_shift:"· de turno agora",comment_ph:"Comentário para o barista…",send_rc:"🔁 Pedir recontagem",after_accept:"Depois de aceitar: 🛒 Fazer encomenda",accepted_line:"✅ Aceite por {0} · {1}",
+order_title:"🛒 Encomenda · 25 out",order_hint:"Escreve quanto encomendar · vazio = não encomendar · stock baixo em cima",items_n:"{0} itens",filled_n:"{0} preenchidos",show_more:"Ver mais {0} ›",show_less2:"Ver menos ‹",left_min:"resta {0} · mín {1}",
+filled_sum:"Preenchido: {0}",empty_skip:"linhas vazias ignoradas",save_order:"Guardar encomenda · {0} itens",nothing_filled:"Escreve pelo menos uma quantidade",
+os_t:"✅ Encomenda guardada no Google Sheet",os_meta:"👤 {0} · 🕚 25.10, {1} · separador “Orders”",os_note:"Não enviada aos fornecedores. Copia o texto e envia como de costume.",copy_for:"📋 Copiar para {0}",copied:"✓ Encomenda {0} copiada",
+orders_none:"Ainda sem encomendas. Aceita uma contagem e toca em “Fazer encomenda”.",saved_orders:"Encomendas guardadas",pending_req:"Pedido pendente",staff_list:"Equipa",
+u_cartons:"pacotes",u_bottles:"garrafas",u_cans:"latas",u_bags:"sacos",u_packs:"emb.",u_pcs:"unid.",u_bunches:"molhos",u_kg:"kg",u_rolls:"rolos"
+},
+uk:{
+banner:"Прототип · приклад даних, нічого не надсилається",story:"Сценарій",progress:"{0} / 14 кроків",reset:"↺ Скинути",next:"Далі:",alldone:"Сценарій пройдено 🎉 Подивись панель таблиці праворуч.",
+r_ana:"Бариста · Ana",r_nazar:"Відповідальний · Nazar",r_maryna:"Відповідальна · Maryna",r_dmytro:"Адмін · Dmytro",lang_app:"Мова додатку",viewing:"Дивитись як",
+chat_of:"бот · чат {0}",admin_sfx:" (адмін)",message:"Повідомлення",app_btn:"☰ Додаток",start:"ПОЧАТИ",
+welcome_t:"👋 Вітаємо в The Layers · Stock!",welcome_b:"Цей бот для команди кав'ярні: підрахунки залишків і замовлення.",welcome_c:"Щоб отримати доступ, натисни <b>📱 Поділитися контактом</b> нижче. Адмін перевірить і підтвердить.",
+share:"📱 Поділитися контактом",share_note:"Передаються лише ім'я та телефон.",thanks:"🙏 Дякую, Ana! Чекаємо підтвердження ⏳",thanks_b:"Напишу, щойно адмін підтвердить.",
+newstaff:"👤 Новий працівник просить доступ",approve:"✅ Підтвердити",reject:"❌ Відхилити",approved_by_you:"✅ Підтверджено тобою · {0}",rejected_by_you:"❌ Відхилено тобою · {0}",
+role_q:"Яка роль в Ana?",role_note:"Відповідальний перевіряє підрахунки й замовляє у своїх постачальників.",barista:"☕ Бариста",cook:"🍳 Кухар",responsible:"🧾 Відповідальний",
+added:"✅ <b>Ana Silva</b> додано як <b>{0}</b>.",added_b:"Записано у вкладку «Staff» · Ana отримала повідомлення.",
+approved_t:"✅ Доступ підтверджено, Ana!",approved_b:"Роль: <b>{0}</b>. Відкрий додаток для підрахунків. Ім'я підставиться саме, вибирати себе зі списку не треба.",open_app:"📲 Відкрити додаток",
+rejected_t:"Запит відхилено. Звернись до менеджера й поділись контактом ще раз.",noaccess:"Доступу поки немає: спершу поділись контактом у боті.",
+hi:"Привіт, {0} 👋",today:"Неділя, 25 жовт.",ro_barista:"Бариста",ro_cook:"Кухар",ro_responsible:"Відповідальний",ro_admin:"Адмін",
+tab_count:"Підрахунок",tab_review:"Перевірка",tab_orders:"Замовлення",tab_staff:"Команда",lock:"🔒 Бачать лише відповідальні й адмін. Бариста цієї вкладки не бачать.",
+sun:"☀️ Недільний підрахунок",wed:"🌤 Підрахунок у середу",sat:"🍷 Вино в суботу",before11:"Сьогодні · до 11:00",sun_meta:"{0} позицій · перевіряють Nazar і Maryna, кожен своїх постачальників",
+wed_meta:"десерти, молоко, пакування",sat_meta:"пляшки · для Eugene",start_count:"Почати підрахунок",continue_count:"Продовжити · {0}/{1}",not_today:"Не сьогодні: у прототипі є лише недільний підрахунок.",last_count:"Останній підрахунок",acc_badge:"✅ Прийнято",
+st_pending:"⏳ {0}: чекає",st_recount:"🔁 {0}: перерахунок",st_accepted:"✅ {0}: прийнято",by_baristas:"Рахує бариста на зміні. Свою частину постачальників ти перевіряєш у вкладці «Перевірка».",
+zone_bar:"Бар",zone_kitchen:"Кухня",zone_storage:"Склад",col_item:"Позиція",col_left:"Залишок",min:"Мін {0}",below:"нижче мін",
+filled:"{0} / {1} заповнено",left_n:"лишилось {0}",submit:"Надіслати підрахунок",fill_all:"Заповни всі позиції",fill_ex:"⚡ Заповнити прикладом",
+sent_review_t:"📤 Твій <b>недільний підрахунок</b> надіслано на перевірку:",items_for:"{0}: {1} позицій",thanks_ana:"Дякую, Ana!",sent_toast:"Підрахунок надіслано. Nazar і Maryna отримали свої частини.",
+rv_t:"📦 Недільний підрахунок: твої позиції",rv_t2:"🔄 {0} надіслала підрахунок повторно",below_n:"⚠️ {0} нижче мін",changed:"ЗМІНИ",unchanged:"Інші {0} твоїх позицій без змін",more_items:"+ ще {0} · «Показати всі»",
+accept:"✅ Прийняти",ask_rc:"🔁 Перерахувати",show_all:"📋 Показати всі {0}",show_less:"📋 Згорнути",superseded:"Замінено перерахунком нижче",rc_to:"🔁 Запит на перерахунок · {0}",
+rc_q:"🔁 Що перерахувати?",rc_q_b:"Тапни позиції, потім «Далі».",next_btn:"Далі: коментар ›",pick_one:"Вибери хоча б одну позицію",selected:"Вибрано: {0}",
+rc_cmt:"💬 Напиши короткий коментар для бариста нижче або пропусти.",skip:"Без коментаря",type_cmt:"Напиши коментар…",
+who_q:"Хто перераховує?",who_b:"Рахувала {0} · зараз на зміні: {1}",counted:"рахувала",send_req:"📤 Надіслати запит",
+rc_sent:"✉️ Надіслано {0}: <b>{1} позицій</b> на перерахунок.",not_emul:"Телефон {0} тут не емулюється. Надішли Ana, щоб продовжити сценарій.",
+push_t:"🔁 {0} просить перерахувати {1} позиції",open_count:"📝 Відкрити підрахунок",
+acc_t:"✅ Підрахунок прийнято і збережено",acc_b:"Недільний підрахунок 25.10 → Google Таблиця",acc_c:"Вкладка «Sun count» · хто рахував, хто прийняв, зміни",acc_d:"Ana отримала повідомлення 👍",acc_e:"🛒 Готовий замовляти? Твої постачальники: <b>{0}</b>",make_order:"🛒 Зробити замовлення",edit_order:"✏️ Змінити замовлення",
+acc_notify:"👍 {0} прийняв твій недільний підрахунок. Дякую!",back_sent:"📤 Перерахунок надіслано {0}. Дякую!",
+rc_by:"🔁 Перерахунок просить {0}",to_recount:"Перерахувати · {0}",was:"було {0}",other_items:"Інші позиції",already:"· {0}, уже пораховано",rechecked:"{0} / {1} перевірено",ready:"Готово",resubmit:"Надіслати повторно",
+open_rc:"Відкрити перерахунок",rc_card:"🔁 Перерахунок просить {0} · {1} поз.",wait_you:"Чекає на тебе",recent:"Нещодавні",open_review:"Відкрити перевірку",nothing_review:"Поки нічого перевіряти. Коли бариста надішле підрахунок, він з'явиться тут.",
+of_your:"{0} твоїх позицій",part_of:"Частина {0}",rv_title:"Перевірка · неділя",send_to:"Перерахунок ({0} поз.) надіслати",on_shift:"· на зміні зараз",comment_ph:"Коментар для бариста…",send_rc:"🔁 На перерахунок",after_accept:"Після «Прийняти»: 🛒 Зробити замовлення",accepted_line:"✅ Прийняв {0} · {1}",
+order_title:"🛒 Замовлення · 25 жовт.",order_hint:"Впиши, скільки замовити · порожньо = не замовляти · низькі залишки зверху",items_n:"{0} поз.",filled_n:"{0} заповнено",show_more:"Ще {0} ›",show_less2:"Згорнути ‹",left_min:"залишок {0} · мін {1}",
+filled_sum:"Заповнено: {0}",empty_skip:"порожні рядки пропускаються",save_order:"Зберегти замовлення · {0} поз.",nothing_filled:"Впиши хоча б одну кількість",
+os_t:"✅ Замовлення збережено в Google Таблицю",os_meta:"👤 {0} · 🕚 25.10, {1} · вкладка «Orders»",os_note:"Постачальникам не надіслано. Скопіюй текст і надішли як зазвичай.",copy_for:"📋 Скопіювати для {0}",copied:"✓ Замовлення {0} скопійовано",
+orders_none:"Замовлень ще немає. Спершу прийми підрахунок, потім «Зробити замовлення».",saved_orders:"Збережені замовлення",pending_req:"Запит на доступ",staff_list:"Команда",
+sheet_title:"Google Таблиця · «Layers stock and orders» (імітація)",sh_empty:"Рядків ще немає.",sh_note:"Зелені рядки щойно записано.",
+u_cartons:"пак.",u_bottles:"пляш.",u_cans:"бан.",u_bags:"пак.",u_packs:"уп.",u_pcs:"шт.",u_bunches:"пучки",u_kg:"кг",u_rolls:"рул.",
+s1:"Ana: /start + поділитися контактом",h1:"Чат Ana: тисни ПОЧАТИ, потім «📱 Поділитися контактом».",s2:"Дмитро підтверджує й обирає роль",h2:"Чат Дмитра: «Підтвердити», потім роль.",
+s3:"Ana отримує доступ → відкриває додаток",h3:"Чат Ana: «📲 Відкрити додаток».",s4:"Ana обирає недільний підрахунок",h4:"У додатку: «Почати підрахунок».",
+s5:"Ana вносить залишки й надсилає",h5:"Заповни всі 3 зони (або ⚡ Заповнити прикладом) і надішли.",s6:"Nazar отримує лише позиції своїх постачальників",h6:"Перемкнись на Nazar: у повідомленні лише його позиції.",
+s7:"Nazar просить перерахувати (позиції, коментар, кому)",h7:"«Перерахувати» → позиції → Далі → коментар → Ana → Надіслати.",s8:"Maryna відкриває вкладку «Перевірка»",h8:"Maryna: ☰ Додаток → Перевірка → Відкрити.",
+s9:"Maryna позначає позиції або приймає в додатку",h9:"Галочки + коментар + «На перерахунок», або «Прийняти».",s10:"Ana отримує пуш → відкриває підрахунок",h10:"Чат Ana: «📝 Відкрити підрахунок».",
+s11:"Ana перераховує й надсилає повторно",h11:"Виправ підсвічені позиції й надішли повторно.",s12:"Nazar приймає → «Зробити замовлення»",h12:"Чат Nazar: «Прийняти» на повторному підрахунку.",
+s13:"Nazar заповнює форму замовлення",h13:"«🛒 Зробити замовлення», впиши кількості або −/+.",s14:"Замовлення збережено → копіювання для кожного постачальника",h14:"«Зберегти замовлення», потім «📋 Скопіювати для …»."
+}};
+
+const SUP={
+ makro:{name:'Makro',resp:'Nazar',dl:'⏰ Sun 12:00',dl2:'delivery Mon',amber:1},
+ continente:{name:'Continente',resp:'Nazar',dl:'urgent only',dl2:'same items as Makro'},
+ horta:{name:'Horta',resp:'Nazar',dl:'⏰ Sun 12:00',dl2:'every 2 weeks · delivery Mon',amber:1},
+ equal:{name:'Equal Food',resp:'Nazar',dl:'any day except Sat–Sun',dl2:'delivery next day'},
+ foundation:{name:'Foundation Coffee Roasters',resp:'Maryna',dl:'⏰ Sunday',dl2:'delivery Mon',amber:1},
+ sorokolat:{name:'Maria Sorokolat',resp:'Maryna',dl:'⏰ Sun 12:00',dl2:'delivery Mon/Tue',amber:1},
+ mila:{name:'Mila (ProFood)',resp:'Maryna',dl:'⏰ Sun 12:00',dl2:'delivery Mon/Tue',amber:1},
+ onepint:{name:'One Pint',resp:'Maryna',dl:'⏰ Sunday',dl2:'delivery Wed',amber:1},
+ glad:{name:'Glad',resp:'Maryna',dl:'once a month',dl2:''},
+ pgraca:{name:'PGraça',resp:'Maryna',dl:'Mon or Wed',dl2:'delivery Wed/Fri'}
+};
+const ITEMS=[
+['milk','makro','bar','cartons',0,11,'Milk (regular)','Leite','Молоко (звичайне)'],
+['lactose','makro','bar','cartons',0,5,'Lactose-free milk','Leite sem lactose','Безлактозне молоко'],
+['tonic','makro','bar','bottles',6,3,'Schweppes tonic','Água tónica Schweppes','Тонік Schweppes'],
+['pedras','makro','bar','bottles',0,16,'Sparkling water 0.25 L Pedras','Água com gás 0,25 L Pedras','Газована вода 0,25 л Pedras'],
+['luso','makro','bar','bottles',0,14,'Still water 0.33 L Luso','Água sem gás 0,33 L Luso','Негазована вода 0,33 л Luso'],
+['condensed','makro','kitchen','cans',0,13,'Condensed milk (cans)','Leite condensado (latas)','Згущене молоко (банки)'],
+['mango','makro','kitchen','cans',0,4,'Mango purée (cans)','Puré de manga (latas)','Пюре манго (банки)'],
+['straw','makro','kitchen','bags',0,0,'Frozen strawberries','Morangos congelados','Заморожена полуниця'],
+['cherry','makro','kitchen','bags',0,0,'Frozen cherries','Cerejas congeladas','Заморожена вишня'],
+['brown','makro','storage','packs',0,2,'Brown sugar','Açúcar mascavado','Коричневий цукор'],
+['sugar','makro','storage','packs',0,4,'Sugar','Açúcar','Цукор'],
+['spark15','makro','storage','bottles',0,7,'Sparkling water 1.5 L','Água com gás 1,5 L','Газована вода 1,5 л'],
+['lemons','horta','bar','pcs',0,3,'Lemons','Limões','Лимони'],
+['rosemary','horta','bar','bunches',0,0.6,'Rosemary','Alecrim','Розмарин'],
+['oat','equal','bar','cartons',0,23,'Oat milk','Bebida de aveia','Вівсяне молоко'],
+['coco','equal','bar','cartons',6,4,'Coconut milk','Bebida de coco','Кокосове молоко'],
+['espresso','foundation','bar','kg',0,6,'Espresso coffee','Café para espresso','Кава для еспресо'],
+['filter','foundation','bar','kg',0,2,'Filter coffee','Café de filtro','Кава для фільтра'],
+['matcha','foundation','bar','packs',2,0.9,'Matcha','Matcha','Матча'],
+['cocoa','foundation','bar','packs',0,1,'Cocoa','Cacau','Какао'],
+['filters','foundation','storage','packs',0,3,'Paper filters','Filtros de papel','Паперові фільтри'],
+['basque','sorokolat','kitchen','pcs',0,10,'Basque cheesecake','Cheesecake basco','Баскський чізкейк'],
+['carrot','sorokolat','kitchen','pcs',0,0,'Carrot cake','Bolo de cenoura','Морквяний торт'],
+['oreshki','sorokolat','kitchen','pcs',0,78,'Oreshki with condensed milk','Nozinhos com leite condensado','Горішки зі згущеним молоком'],
+['datematcha','mila','kitchen','pcs',0,36,'Date with matcha','Tâmara com matcha','Фініки з матчею'],
+['cocandy','mila','kitchen','pcs',0,0,'Vegan coconut candy','Bombom vegano de coco','Веганські кокосові цукерки'],
+['kombucha','onepint','bar','bottles',0,8,'Kombucha','Kombucha','Комбуча'],
+['beer','onepint','bar','bottles',0,12,'Beer','Cerveja','Пиво'],
+['hotchoc','glad','bar','packs',0,1.1,'Hot chocolate','Chocolate quente','Гарячий шоколад'],
+['cups','pgraca','storage','packs',0,83,'Cups 250 ml','Copos 250 ml','Стаканчики 250 мл'],
+['napkins','pgraca','storage','packs',20,9,'Guest napkins (white)','Guardanapos para clientes (brancos)','Серветки для гостей (білі)'],
+['toilet','pgraca','storage','rolls',0,26,'Toilet paper','Papel higiénico','Туалетний папір']
+].map(a=>({id:a[0],sup:a[1],zone:a[2],unit:a[3],min:a[4],ex:a[5],en:a[6],pt:a[7],uk:a[8]}));
+const IT=Object.fromEntries(ITEMS.map(i=>[i.id,i]));
+const ROLES={ana:{name:'Ana',k:'barista',ava:'AS'},nazar:{name:'Nazar',k:'responsible',ava:'N'},maryna:{name:'Maryna',k:'responsible',ava:'M'},dmytro:{name:'Dmytro',k:'admin',ava:'D'}};
+const RESP=['Nazar','Maryna'];const rk=n=>n.toLowerCase();
+const ONSHIFT=['Marta','João'];
+const STEPS=[
+ ['ana',()=>S.ana.status!=='new'],['dmytro',()=>!!S.ana.role],['ana',()=>S.f.anaApp],['ana',()=>S.count.status!=='none'],
+ ['ana',()=>S.count.status==='submitted'],['nazar',()=>S.f.nazarSaw],['nazar',()=>S.tasks.some(x=>x.resp==='Nazar')],
+ ['maryna',()=>S.f.marynaReview],['maryna',()=>!!S.parts.Maryna&&(S.parts.Maryna.status==='accepted'||S.tasks.some(x=>x.resp==='Maryna'))],
+ ['ana',()=>S.f.anaRc],['ana',()=>S.tasks.some(x=>x.status==='done')],['nazar',()=>!!S.parts.Nazar&&S.parts.Nazar.status==='accepted'],
+ ['nazar',()=>S.f.orderOpen],['nazar',()=>S.f.copied]];
+let S;
+function init(){S={lang:'en',role:'ana',min:9*60+40,seq:0,mid:0,wrote:false,
+ view:{ana:'chat',nazar:'chat',maryna:'chat',dmytro:'chat'},
+ app:{ana:{tab:'count',scr:'home'},nazar:{tab:'count',scr:'home'},maryna:{tab:'count',scr:'home'},dmytro:{tab:'count',scr:'home'}},
+ chats:{ana:[],nazar:[],maryna:[],dmytro:[]},unread:{},
+ ana:{status:'new',role:null,kb:false,started:false,reqId:null},
+ count:{status:'none',vals:{},zone:'bar',by:null,at:null,iseq:{},hist:{}},
+ parts:{},tasks:[],orders:{},f:{},sheetTab:'staff',
+ sheet:{staff:[
+  {seq:0,name:'Dmytro Ovcharenko',phone:'+351 9xx xxx 001',tg:'@dmytro',role:'Admin',by:'—',at:'01.10'},
+  {seq:0,name:'Nazar',phone:'+351 9xx xxx 002',tg:'@nazar',role:'Responsible (chef)',by:'Dmytro',at:'01.10'},
+  {seq:0,name:'Maryna',phone:'+351 9xx xxx 003',tg:'@maryna',role:'Responsible',by:'Dmytro',at:'01.10'},
+  {seq:0,name:'Marta',phone:'+351 9xx xxx 004',tg:'@marta',role:'Barista',by:'Dmytro',at:'02.10'},
+  {seq:0,name:'João',phone:'+351 9xx xxx 005',tg:'@joao',role:'Barista',by:'Dmytro',at:'05.10'}],orders:[],log:[]}};}
+init();
+// helpers
+function t(k,...a){let s=(L[S.lang]&&L[S.lang][k]);if(s==null)s=L.en[k];if(s==null)s=k;a.forEach((v,i)=>{s=s.split('{'+i+'}').join(v)});return s}
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const nm=i=>i[S.lang]||i.en;const sub=i=>S.lang==='pt'?i.en:i.pt;
+const un=u=>t('u_'+u);
+const fmt=n=>n==null?'—':(S.lang==='en'?String(n):String(n).replace('.',','));
+const pv=s=>{s=String(s==null?'':s).trim().replace(',','.');if(s==='')return null;const n=parseFloat(s);return isNaN(n)||n<0?null:n};
+const low=(i,v)=>i.min>0&&v!=null&&v<i.min;
+const now=()=>{const h=Math.floor(S.min/60),m=S.min%60;return String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')};
+const tick=(n=1)=>{S.min+=n};
+function W(){if(!S.wrote){S.seq++;S.wrote=true}return S.seq}
+function log(who,what){S.sheet.log.push({seq:W(),t:'25.10 '+now(),who,what})}
+function push(r,kind,data,me){const m={id:++S.mid,kind,data:data||{},t:now(),me:!!me};S.chats[r].push(m);if(S.role!==r)S.unread[r]=(S.unread[r]||0)+1;return m}
+const itemsOf=resp=>ITEMS.filter(i=>SUP[i.sup].resp===resp);
+const supsOf=resp=>Object.keys(SUP).filter(s=>SUP[s].resp===resp);
+const supItems=s=>s==='continente'?ITEMS.filter(i=>i.sup==='makro'):ITEMS.filter(i=>i.sup===s);
+const lowFirst=(arr,vals)=>arr.map((x,ix)=>[x,ix]).sort((a,b)=>(low(b[0],vals[b[0].id])-low(a[0],vals[a[0].id]))||a[1]-b[1]).map(x=>x[0]);
+const me=()=>ROLES[S.role].name;
+let toastT;function toast(msg){const el=document.getElementById('toast');el.innerHTML=msg;el.className='toastg on';clearTimeout(toastT);toastT=setTimeout(()=>el.className='toastg',2600)}
+const btn=(lbl,act,a='',cls='')=>`<span class="${cls}" data-act="${act}" data-a="${esc(a)}">${lbl}</span>`;
+const KB=(b,cls='')=>b.length?`<div class="kb ${cls}">${b.join('')}</div>`:'';
+// ---------- chat messages
+function contact(out){return `<div class="contact"><div class="ava">AS</div><div><b>Ana Silva</b><br><span style="font-size:12.5px;color:${out?'#5fb15a':'#8e8e93'}">+351 9xx xxx 123${out?'':' · @ana'}</span></div></div>`}
+function reviewLines(resp,vals,expanded){
+ const items=itemsOf(resp);let shown=items;
+ if(!expanded){const lows=items.filter(i=>low(i,vals[i.id]));shown=items.filter(i=>low(i,vals[i.id])||items.indexOf(i)<Math.max(0,8-lows.length)).slice(0,9)}
+ let h='',cur='';
+ supsOf(resp).forEach(s=>{const list=lowFirst(shown.filter(i=>i.sup===s),vals);if(!list.length)return;
+  h+=`<div class="zh">${SUP[s].name.toUpperCase()}</div>`;
+  list.forEach(i=>{const lw=low(i,vals[i.id]);h+=`<div class="li"><span class="${lw?'warn':''}">${esc(nm(i))}${lw?' ⚠️ '+t('min',i.min).toLowerCase():''}</span><span><b>${fmt(vals[i.id])}</b> ${un(i.unit)}</span></div>`})});
+ if(!expanded&&items.length>shown.length)h+=`<hr><span class="muted sm">${t('more_items',items.length-shown.length)}</span>`;
+ return h}
+function msgHTML(m,r){
+ const d=m.data,tm=`<div class="tm">${m.t}${m.me?' ✓✓':''}</div>`;
+ const B=(h,cls='')=>`<div class="msg ${cls}${m.me?' out':''}">${h}${tm}</div>`;
+ switch(m.kind){
+ case 'me':return B(esc(d.text));
+ case 'contact':return B(contact(true));
+ case 'welcome':return B(`<b>${t('welcome_t')}</b><br>${t('welcome_b')}<br><br>${t('welcome_c')}`);
+ case 'thanks':return B(`${t('thanks')}<br><span class="muted sm">${t('thanks_b')}</span>`);
+ case 'rejected':return B(t('rejected_t'));
+ case 'newstaff':{let st='';if(d.res==='approved')st=`<div class="status-line">${t('approved_by_you',d.at)}</div>`;if(d.res==='rejected')st=`<div class="status-line" style="color:#e5484d">${t('rejected_by_you',d.at)}</div>`;
+  return B(`<b>${t('newstaff')}</b><div style="margin-top:6px">${contact(false)}</div>${st}`)+(d.res?'':KB([btn(t('approve'),'approve'),btn(t('reject'),'reject')],'c2'))}
+ case 'pickrole':return B(`<b>${t('role_q')}</b><br><span class="muted sm">${t('role_note')}</span>`)+(S.ana.role?'':KB(['barista','cook','responsible'].map(x=>btn(t(x),'pickrole',x)),'c3'));
+ case 'added':return B(`${t('added',t('ro_'+d.role))}<br><span class="muted sm">${t('added_b')}</span>`);
+ case 'approved':return B(`<b>${t('approved_t')}</b><br>${t('approved_b',t('ro_'+d.role))}`)+KB([btn(t('open_app'),'openapp','','sel')]);
+ case 'sentrev':return B(`${t('sent_review_t')}<br>${RESP.map(x=>'• '+t('items_for',x,itemsOf(x).length)).join('<br>')}<br>${t('thanks_ana')}`);
+ case 'review':{const p=S.parts[d.resp];const items=itemsOf(d.resp);const lowsN=items.filter(i=>low(i,d.vals[i.id])).length;
+  let h=`<b>${d.round>1?t('rv_t2',d.by):t('rv_t')}</b><br>👤 ${d.by} · 🕙 25.10, ${m.t}<br>${t('items_n',items.length)} · ${supsOf(d.resp).map(s=>SUP[s].name).join(', ')}${lowsN?` · <b class="warn">${t('below_n',lowsN)}</b>`:''}`;
+  if(d.round>1){h+=`<div class="zh">${t('changed')}</div>`+d.changes.map(c=>`<div class="li"><span>${esc(nm(IT[c[0]]))}</span><span>${fmt(c[1])} → <b>${fmt(c[2])}</b> ${un(IT[c[0]].unit)}</span></div>`).join('')+`<hr><span class="muted sm">${t('unchanged',items.length-d.changes.length)}</span>`;
+   if(m.expanded)h+=reviewLines(d.resp,d.vals,true)}
+  else h+=reviewLines(d.resp,d.vals,!!m.expanded);
+  const latest=d.round===p.round&&m.id===p.lastMsg;
+  if(!latest)h+=`<div class="status-line" style="color:#8e8e93">${t('superseded')}</div>`;
+  else if(p.status==='accepted')h+=`<div class="status-line">${t('accepted_line',p.accBy,p.accAt)}</div>`;
+  else if(p.status==='recount')h+=`<div class="status-line" style="color:#b7791f">${t('rc_to',p.rcTo)}</div>`;
+  const active=latest&&p.status!=='accepted'&&!p.chat.stage;
+  return B(h)+(active?KB([btn(t('accept'),'accept',d.resp),btn(t('ask_rc'),'askrc',d.resp),btn(m.expanded?t('show_less'):t('show_all',items.length),'showall',m.id,'full dim')],'c2'):(latest&&p.status!=='accepted'?'':''))}
+ case 'rcitems':{const p=S.parts[d.resp];const active=p.chat.stage==='items'&&p.chat.mid===m.id;
+  let h=`<b>${t('rc_q')}</b><br>${t('rc_q_b')}`;
+  if(!active&&d.sel)h+=`<br><span class="muted sm">${t('selected',d.sel.map(id=>esc(nm(IT[id]))).join(', '))}</span>`;
+  if(!active)return B(h);
+  const items=lowFirst(itemsOf(d.resp),S.count.vals);
+  return B(h)+KB(items.map(i=>btn((p.draft.items.has(i.id)?'☑ ':'')+esc(nm(i)),'rctog',d.resp+'|'+i.id,p.draft.items.has(i.id)?'sel':'')).concat([btn(t('next_btn'),'rcnext',d.resp,'full')]),'c2')}
+ case 'rccmt':{const p=S.parts[d.resp];return B(t('rc_cmt'))+(p.chat.stage==='comment'&&p.chat.mid===m.id?KB([btn(t('skip'),'skipcmt',d.resp,'dim')]):'')}
+ case 'rcwho':{const p=S.parts[d.resp];const active=p.chat.stage==='who'&&p.chat.mid===m.id;
+  const h=`<b>${t('who_q')}</b><br><span class="muted sm">${t('who_b',p.countedBy,ONSHIFT.join(', '))}</span>`;
+  if(!active)return B(h);
+  const who=[p.countedBy,...ONSHIFT.filter(x=>x!==p.countedBy)];
+  return B(h)+KB(who.map(x=>btn((p.draft.who===x?'☑ ':'')+x+(x===p.countedBy?' · '+t('counted'):''),'rcwho',d.resp+'|'+x,p.draft.who===x?'sel':'')).concat([btn(t('send_req'),'rcsend',d.resp,'full')]),'c3')}
+ case 'rcsent':return B(t('rc_sent',d.to,d.n));
+ case 'push':{const k=S.tasks[d.task];return B(`<b>${t('push_t',k.resp,k.items.length)}</b><div style="margin-top:4px">${k.items.map(id=>'• '+esc(nm(IT[id]))).join('<br>')}</div>${k.comment?`<div class="quote">💬 “${esc(k.comment)}”</div>`:''}`)+(k.status==='open'?KB([btn(t('open_count'),'openrc',d.task,'sel')]):'')}
+ case 'acc':{const sups=supsOf(d.resp).map(s=>SUP[s].name).join(', ');return B(`<b>${t('acc_t')}</b><br>${t('acc_b')}<br><span class="muted sm">${t('acc_c')}</span><br>${t('acc_d')}<hr>${t('acc_e',sups)}`)+KB([btn(t('make_order'),'makeorder',d.resp,'sel')])}
+ case 'accn':return B(t('acc_notify',d.by));
+ case 'backsent':return B(t('back_sent',d.resp));
+ case 'os':{let h=`<b>${t('os_t')}</b><br>${t('os_meta',d.by,m.t)}`;
+  Object.keys(d.snap).forEach(s=>{h+=`<div class="zh">${SUP[s].name.toUpperCase()}${SUP[s].dl?' · '+SUP[s].dl.replace('⏰ ',''):''}</div>`+d.snap[s].map(([id,q])=>`<div class="li"><span>${esc(nm(IT[id]))}</span><span><b>${fmt(q)}</b> ${un(IT[id].unit)}</span></div>`).join('')});
+  h+=`<hr><span class="muted sm">${t('os_note')}</span>`;
+  const latest=S.orders[d.resp]&&S.orders[d.resp].mid===m.id;
+  return B(h)+(latest?KB(Object.keys(d.snap).map(s=>btn(t('copy_for',SUP[s].name),'copy',d.resp+'|'+s)).concat([btn(t('edit_order'),'makeorder',d.resp,'dim')])):'')}
+ }return ''}
+function chatView(r){
+ const ro=ROLES[r];let h=`<div class="chathead"><span class="back">‹</span><div class="ava">TL</div><div><div class="t">The Layers · Stock</div><div class="s">${t('chat_of',ro.name)}${r==='dmytro'?t('admin_sfx'):''}</div></div></div><div class="chat" id="chatbox">`;
+ h+=`<div class="day">Sunday, 25 October</div>`;
+ if(!S.chats[r].length)h+=`<div class="msg" style="align-self:center;text-align:center;opacity:.8"><span class="muted sm">${r==='ana'?'Ana has never opened the bot yet.':'No messages yet.'}</span></div>`;
+ S.chats[r].forEach(m=>h+=msgHTML(m,r));h+='</div>';
+ if(r==='ana'&&!S.ana.started)return h+`<div class="startbar">${btn(t('start'),'start')}</div>`;
+ if(r==='ana'&&S.ana.kb)h+=`<div class="rkb">${btn(t('share'),'share')}<small>${t('share_note')}</small></div>`;
+ const p=RESP.map(x=>S.parts[x]).find(p=>p&&rk(p.resp)===r&&p.chat.stage==='comment');
+ if(p)h+=`<div class="input"><span data-act="openapp" class="menu">${t('app_btn')}</span><input class="chatin" id="chatin" placeholder="${t('type_cmt')}" autocomplete="off"><span data-act="sendcmt" data-a="${p.resp}" class="sendb">${t('send')}</span></div>`;
+ else h+=`<div class="input"><span data-act="openapp" class="menu">${t('app_btn')}</span><span class="f">${t('message')}</span><span>🎤</span></div>`;
+ return h}
+// ---------- app
+const langSw=()=>`<div class="lang">${['en','pt','uk'].map(l=>btn(l.toUpperCase(),'lang',l,S.lang===l?'on':'')).join('')}</div>`;
+const tgbar=(title,small,back)=>`<div class="tgbar">${back?btn('‹ Back','back','','close'):btn('✕ Close','closeapp','','close')}<span class="title">${title}<small>${small}</small></span><span class="dots">⋮</span></div>`;
+const roleLabel=r=>r==='ana'?t('ro_'+(S.ana.role||'barista')):t('ro_'+ROLES[r].k);
+function partBadges(){return RESP.map(x=>{const p=S.parts[x];if(!p)return'';const k={pending:'st_pending',recount:'st_recount',accepted:'st_accepted'}[p.status];return `<span class="badge ${p.status==='accepted'?'green':p.status==='recount'?'amber':''}">${t(k,x)}</span>`}).join(' ')}
+function filledN(){return ITEMS.filter(i=>S.count.vals[i.id]!=null).length}
+function homeCount(r){
+ let h='';
+ if(r==='ana'){S.tasks.forEach((k,ix)=>{if(k.to==='Ana'&&k.status==='open')h+=`<div class="card" style="border:2px solid #f5a623;background:#fffaf0"><h3 style="font-size:15px">${t('rc_card',k.resp,k.items.length)}</h3>${k.comment?`<div class="muted" style="margin-top:4px">“${esc(k.comment)}”</div>`:''}${btn(t('open_rc'),'openrc',ix,'cta')}</div>`})}
+ const st=S.count.status;
+ h+=`<div class="card" style="border:2px solid #2AABEE"><div class="row"><h3>${t('sun')}</h3><span class="badge">${t('before11')}</span></div><div class="muted" style="margin-top:4px">${t('sun_meta',ITEMS.length)}</div>
+ <div class="chips">${['bar','kitchen','storage'].map(z=>`<span class="chip">${{bar:'☕',kitchen:'🍰',storage:'📦'}[z]} ${t('zone_'+z)} ${ITEMS.filter(i=>i.zone===z).length}</span>`).join('')}</div>`;
+ if(st==='submitted')h+=`<div class="chips">${partBadges()}</div>`;
+ else if(r==='ana')h+=btn(st==='draft'?t('continue_count',filledN(),ITEMS.length):t('start_count'),'startcount','','cta');
+ else h+=`<div class="muted sm" style="margin-top:8px">${t('by_baristas')}</div>`;
+ h+=`</div><div class="card" data-act="notyet" style="opacity:.7"><div class="row"><h3>${t('wed')}</h3><span class="badge amber">Wed 28 Oct</span></div><div class="muted" style="margin-top:4px">35 · ${t('wed_meta')}</div></div>
+ <div class="card" data-act="notyet" style="opacity:.7"><div class="row"><h3>${t('sat')}</h3><span class="badge amber">Sat 31 Oct</span></div><div class="muted" style="margin-top:4px">15 ${t('sat_meta')}</div></div>
+ <div class="card" style="background:#f9fafb;box-shadow:none;border:1px dashed #dfe2e6"><div class="muted" style="font-weight:600;color:#555">${t('last_count')}</div><div class="row" style="margin-top:6px;font-size:13.5px"><span>Wed 21 Oct · Marta</span><span class="badge green">${t('acc_badge')}</span></div></div>`;
+ return h}
+const visibleParts=r=>r==='dmytro'?RESP.filter(x=>S.parts[x]):RESP.filter(x=>S.parts[x]&&rk(x)===r);
+function homeReview(r){
+ let h=`<div class="lock">${t('lock')}</div>`;const ps=visibleParts(r);
+ if(!ps.length)return h+`<div class="card muted">${t('nothing_review')}</div>`;
+ const pend=ps.filter(x=>S.parts[x].status!=='accepted'),done=ps.filter(x=>S.parts[x].status==='accepted');
+ if(pend.length)h+=`<div class="muted" style="font-weight:600;color:#555;margin-top:14px">${t('wait_you')}</div>`;
+ pend.forEach(x=>{const p=S.parts[x],items=itemsOf(x),lw=items.filter(i=>low(i,S.count.vals[i.id])).length;
+  h+=`<div class="card" style="border:2px solid ${p.status==='recount'?'#f5a623':'#2AABEE'};margin-top:8px"><div class="row"><h3>${t('sun')}</h3><span class="badge amber">⏰ 12:00</span></div>
+  <div class="muted" style="margin-top:4px">👤 ${p.countedBy} · 25.10, ${S.count.at} · ${r==='dmytro'?t('part_of',x)+' · ':''}${t('of_your',items.length)}</div>
+  <div class="chips">${lw?`<span class="chip" style="color:#e5484d;font-weight:600">${t('below_n',lw)}</span>`:''}${p.status==='recount'?`<span class="chip" style="color:#b7791f;font-weight:600">${t('rc_to',p.rcTo)}</span>`:''}<span class="chip">${supsOf(x).map(s=>SUP[s].name.split(' ')[0]).join(' · ')}</span></div>${btn(t('open_review'),'openreview',x,'cta')}</div>`});
+ h+=`<div class="muted" style="font-weight:600;color:#555;margin-top:16px">${t('recent')}</div>`;
+ done.forEach(x=>{const p=S.parts[x];h+=`<div class="card" style="margin-top:8px" data-act="openreview" data-a="${x}"><div class="row" style="font-size:13.5px"><span>☀️ Sun 25.10 · ${t('part_of',x)}</span><span class="badge green">${t('accepted_line',p.accBy,p.accAt)}</span></div></div>`});
+ h+=`<div class="card" style="margin-top:8px"><div class="row" style="font-size:13.5px"><span>🌤 Wed 21.10 · Marta</span><span class="badge green">${t('acc_badge')}</span></div></div>`;
+ return h}
+function homeOrders(r){
+ const rs=r==='dmytro'?RESP:RESP.filter(x=>rk(x)===r);let h='';
+ rs.forEach(x=>{const p=S.parts[x],o=S.orders[x];
+  if(o&&o.saved){h+=`<div class="card"><div class="row"><h3>🛒 ${x} · 25.10</h3><span class="badge green">${o.savedAt}</span></div>`+Object.keys(o.saved).map(s=>`<div class="muted" style="margin-top:6px"><b style="color:#111">${SUP[s].name}</b>: ${o.saved[s].map(([id,q])=>esc(nm(IT[id]))+' '+fmt(q)).join(', ')}</div>`).join('')+(rk(x)===r?btn(t('edit_order'),'makeorder',x,'cta ghost'):'')+`</div>`}
+  else if(p&&p.status==='accepted'&&rk(x)===r)h+=`<div class="card"><h3>${t('acc_t')}</h3>${btn(t('make_order'),'makeorder',x,'cta')}</div>`});
+ return h||`<div class="card muted">${t('orders_none')}</div>`}
+function homeStaff(){
+ let h='';if(S.ana.status==='shared')h+=`<div class="card" style="border:2px solid #2AABEE"><div class="muted" style="font-weight:600">${t('pending_req')}</div><div style="margin-top:8px">${contact(false)}</div><div class="btn2">${btn(t('reject'),'reject','','cta ghost')}${btn(t('approve'),'approve','','cta')}</div></div>`;
+ h+=`<div class="muted" style="font-weight:600;color:#555;margin-top:14px">${t('staff_list')}</div>`;
+ S.sheet.staff.forEach(s=>h+=`<div class="card" style="margin-top:8px;padding:10px 14px"><div class="row" style="font-size:13.5px"><span><b>${esc(s.name)}</b><br><span class="muted">${s.phone} · ${s.tg}</span></span><span class="badge">${esc(s.role)}</span></div></div>`);
+ return h}
+function appHome(r){
+ const A=S.app[r];const tabs=r==='ana'?[]:(r==='dmytro'?['count','review','orders','staff']:['count','review','orders']);
+ const pendN=visibleParts(r).filter(x=>S.parts[x].status!=='accepted').length;
+ let h=tgbar('The Layers · Stock','mini app')+`<div class="app"><div class="scroll pad"><div class="row"><div><div class="hello">${t('hi',ROLES[r].name)}</div><div class="muted">${t('today')} · ${roleLabel(r)}${r==='ana'?' · Ana Silva':''}</div></div>${langSw()}</div>`;
+ if(tabs.length)h+=`<div class="seg">${tabs.map(x=>`<span class="${A.tab===x?'on':''}" data-act="tab" data-a="${x}">${t('tab_'+x)}${x==='review'&&pendN?`<em>${pendN}</em>`:''}</span>`).join('')}</div>`;
+ const tab=tabs.length?A.tab:'count';
+ h+=tab==='count'?homeCount(r):tab==='review'?homeReview(r):tab==='orders'?homeOrders(r):homeStaff();
+ return h+'</div></div>'}
+function cntRow(i){const v=S.count.vals[i.id];const lw=low(i,v);
+ return `<div class="item one" id="row-${i.id}"><div><div class="n">${esc(nm(i))}</div><div class="pt">${esc(sub(i))}</div><div class="meta">${un(i.unit)} · ${i.min?`<span class="${lw?'low':'min'}">${t('min',i.min)}${lw?' · '+t('below'):''}</span>`:t('min','—')}</div></div><input class="in ${lw?'red':''}" data-cnt="${i.id}" inputmode="decimal" value="${v==null?'':fmt(v)}" placeholder="—"></div>`}
+function countTabs(){return ['bar','kitchen','storage'].map(z=>{const its=ITEMS.filter(i=>i.zone===z);return `<span class="${S.count.zone===z?'on':''}" data-act="zone" data-a="${z}">${t('zone_'+z)}<em>${its.filter(i=>S.count.vals[i.id]!=null).length}/${its.length}</em></span>`}).join('')}
+function countFoot(){const f=filledN(),n=ITEMS.length;return `<div class="row"><span>${t('filled',f,n)}</span><span class="muted">${f<n?t('left_n',n-f):''}</span></div><div class="bar"><i style="width:${Math.round(f/n*100)}%;${f===n?'background:#1f9d55':''}"></i></div>${f===n?btn(t('submit'),'submit','','cta'):`<span class="cta dis">${t('fill_all')}</span>`}<div class="exl">${btn(t('fill_ex'),'fillex')}</div>`}
+function appCount(){
+ return tgbar('The Layers · Stock',t('sun'),true)+`<div class="app"><div class="head2"><div class="row"><div style="font-weight:700;font-size:15px">${t('sun')} · 25 Oct</div>${langSw()}</div><div class="tabs" id="ctabs">${countTabs()}</div></div>
+ <div class="colh one"><span>${t('col_item')}</span><span>${t('col_left')}</span></div><div class="scroll">${ITEMS.filter(i=>i.zone===S.count.zone).map(cntRow).join('')}</div><div class="foot" id="cfoot">${countFoot()}</div></div>`}
+function rcFoot(k){const n=k.items.length,f=k.items.filter(id=>k.vals[id]!=null).length;return `<div class="row"><span>${t('rechecked',f,n)}</span>${f===n?`<span class="badge green">${t('ready')}</span>`:''}</div><div class="bar"><i style="width:${Math.round(f/n*100)}%;background:#1f9d55"></i></div>${f===n?btn(t('resubmit'),'resubmit',k.id,'cta'):`<span class="cta dis">${t('resubmit')}</span>`}`}
+function appRecount(ix){const k=S.tasks[ix];
+ let h=tgbar('The Layers · Stock',t('sun')+' · recount',true)+`<div class="app"><div class="scroll"><div class="banner"><h4>${t('rc_by',k.resp)}</h4>${k.comment?`<p>“${esc(k.comment)}”</p>`:''}</div><div class="colh one" style="margin-top:6px"><span>${t('to_recount',k.items.length)}</span><span>${t('col_left')}</span></div>`;
+ k.items.forEach(id=>{const i=IT[id],v=k.vals[id];h+=`<div class="item one flag"><div><div class="n">${esc(nm(i))}</div><div class="pt">${esc(sub(i))}</div><div class="was">${t('zone_'+i.zone)} · ${un(i.unit)} · ${t('was',fmt(S.count.vals[id]))}${i.min?' · '+t('min',i.min):''}</div></div><input class="in ${low(i,v)?'red':''}" data-rc="${ix}|${id}" inputmode="decimal" value="${v==null?'':fmt(v)}" placeholder="—"></div>`});
+ const others=itemsOf(k.resp).filter(i=>!k.items.includes(i.id));
+ h+=`<div class="zone"><span>${t('other_items')} <small>${t('already',others.length)}</small></span></div>`+others.slice(0,4).map(i=>`<div class="item one ok"><div><div class="n">${esc(nm(i))}</div><div class="meta">${un(i.unit)}</div></div><div class="in">${fmt(S.count.vals[i.id])}</div></div>`).join('');
+ return h+`</div><div class="foot" id="rcfoot">${rcFoot(k)}</div></div>`}
+function appReview(r,x){const p=S.parts[x];if(!p.draft)p.draft={items:new Set(),comment:'',who:p.countedBy};const dr=p.draft;
+ let h=tgbar(t('rv_title'),`${p.countedBy} · 25.10, ${S.count.at} · ${t('items_n',itemsOf(x).length)}${r==='dmytro'?' · '+t('part_of',x):''}`,true)+`<div class="app"><div class="scroll">`;
+ supsOf(x).forEach(s=>{const its=lowFirst(ITEMS.filter(i=>i.sup===s),S.count.vals);if(!its.length)return;h+=`<div class="sh">${SUP[s].name.toUpperCase()}</div>`;
+  its.forEach(i=>{const on=dr.items.has(i.id),v=S.count.vals[i.id];h+=`<div class="rv ${on?'on':''}" ${p.status!=='accepted'?`data-act="rvtog" data-a="${x}|${i.id}"`:''}><span class="cb">${on?'✓':''}</span><span>${esc(nm(i))} ${low(i,v)?`<span class="w">⚠️ ${t('min',i.min).toLowerCase()}</span>`:''}</span><span class="v">${fmt(v)} <small>${un(i.unit)}</small></span></div>`})});
+ h+=`</div><div class="foot" style="padding-top:9px;padding-bottom:14px">`;
+ if(p.status==='accepted')h+=`<div class="status-line" style="text-align:center">${t('accepted_line',p.accBy,p.accAt)}</div>`+(rk(x)===r?btn(t('make_order'),'makeorder',x,'cta'):'');
+ else{const who=[p.countedBy,...ONSHIFT.filter(y=>y!==p.countedBy)];
+  if(p.status==='recount')h+=`<div class="status-line" style="color:#b7791f;margin:0 0 6px">${t('rc_to',p.rcTo)}</div>`;
+  h+=`<textarea class="cmt" id="rvcomment" data-a="${x}" rows="2" placeholder="${t('comment_ph')}">${esc(dr.comment)}</textarea>
+  <div style="font-size:12px;font-weight:600;margin-top:8px">${t('send_to',dr.items.size)} <span class="muted" style="font-weight:500">${t('on_shift')}</span></div>
+  <div class="who">${who.map(y=>btn((dr.who===y?'☑ ':'')+y+(y===p.countedBy?' · '+t('counted'):''),'rvwho',x+'|'+y,dr.who===y?'on':'')).join('')}</div>
+  <div class="btn2">${btn(t('send_rc'),'rvsend',x,'cta ghost')}${btn(t('accept'),'accept',x,'cta')}</div><div class="muted" style="font-size:11.5px;text-align:center;margin-top:6px">${t('after_accept')}</div>`}
+ return h+'</div></div>'}
+function oFoot(x){const o=S.orders[x];const per={};Object.entries(o.q).forEach(([k,v])=>{if(v>0){const s=k.split('|')[0];per[s]=(per[s]||0)+1}});const n=Object.values(per).reduce((a,b)=>a+b,0);
+ return `<div class="row"><span>${t('filled_sum',Object.keys(per).map(s=>SUP[s].name+' '+per[s]).join(' · ')||'—')}</span><span class="muted">${t('empty_skip')}</span></div>${n?btn(t('save_order',n),'saveorder',x,'cta'):`<span class="cta dis">${t('save_order',0)}</span>`}`}
+function appOrder(x){const o=S.orders[x];const vals=S.count.vals;
+ let h=tgbar('The Layers · Order',`${x} · from ${t('sun').replace(/^\S+ /,'')}`,true)+`<div class="app"><div class="ohead"><div class="row"><b>${t('order_title')}</b>${langSw()}</div>${t('order_hint')}</div><div class="scroll">`;
+ supsOf(x).forEach(s=>{const its=lowFirst(supItems(s),vals);const open=o.open[s]!==false;const fN=its.filter(i=>o.q[s+'|'+i.id]>0).length;
+  h+=`<div class="sup ${open?'':'closed'}" data-act="suptog" data-a="${x}|${s}"><div><div class="sn">${SUP[s].name} <span class="badge ${SUP[s].amber?'amber':''}">${SUP[s].dl}</span></div><div class="sd">${SUP[s].dl2?SUP[s].dl2+' · ':''}${t('items_n',its.length)} · ${t('filled_n',fN)}</div></div><span class="car">${open?'▾':'›'}</span></div>`;
+  if(!open)return;const lim=o.more[s]?its.length:Math.min(its.length,5);
+  its.slice(0,lim).forEach(i=>{const k=s+'|'+i.id,v=vals[i.id],q=o.q[k];h+=`<div class="oi ${low(i,v)?'lowrow':''}"><div><div class="n">${esc(nm(i))}</div><div class="meta">${low(i,v)?`<span class="low">${t('left_min',fmt(v),i.min)}</span>`:t('left_min',fmt(v),i.min||'—')} · ${un(i.unit)}</div></div><div class="step">${btn('−','qminus',x+'|'+k)}<input data-q="${x}|${k}" inputmode="decimal" placeholder="—" value="${q>0?fmt(q):''}">${btn('+','qplus',x+'|'+k)}</div></div>`});
+  if(its.length>5)h+=`<div class="more" data-act="supmore" data-a="${x}|${s}">${o.more[s]?t('show_less2'):t('show_more',its.length-5)}</div>`});
+ return h+`</div><div class="foot" id="ofoot" style="padding-bottom:16px">${oFoot(x)}</div></div>`}
+function appView(r){const A=S.app[r];
+ if(r==='ana'&&S.ana.status!=='approved')return tgbar('The Layers · Stock','mini app')+`<div class="app"><div class="pad"><div class="card">${t('noaccess')}</div></div></div>`;
+ if(A.scr==='count')return appCount();if(A.scr==='recount')return appRecount(A.arg);if(A.scr==='review')return appReview(r,A.arg);if(A.scr==='order')return appOrder(A.arg);return appHome(r)}
+// ---------- side panels
+function stepsHTML(){let cur=STEPS.findIndex(s=>!s[1]());const done=STEPS.filter(s=>s[1]()).length;
+ let h=`<h3>${t('story')}</h3><div class="muted" style="margin:4px 0 6px">${t('progress',done)}</div><div class="bar"><i style="width:${Math.round(done/14*100)}%"></i></div><ol class="steps">`;
+ STEPS.forEach((s,ix)=>{const d=s[1]();h+=`<li class="${d?'done':''} ${ix===cur?'cur':''}" data-act="step" data-a="${ix}"><span class="sn">${d?'✓':ix+1}</span><span>${t('s'+(ix+1))}<small>${ROLES[s[0]].name}</small></span></li>`});
+ h+='</ol>';h+=cur<0?`<div class="hint">${t('alldone')}</div>`:`<div class="hint"><b>${t('next')}</b> ${t('h'+(cur+1))}</div>`;
+ return h+`<div style="margin-top:12px">${btn(t('reset'),'reset','','pill')}</div>`}
+function tbl(cols,rows){if(!rows.length)return `<div class="muted" style="padding:14px">${t('sh_empty')}</div>`;return `<table><tr>${cols.map(c=>`<th>${c}</th>`).join('')}</tr>${rows.map(r=>`<tr class="${r.seq===S.seq&&r.seq>0?'new':''}">${r.c.map(c=>`<td>${esc(c==null?'':c)}</td>`).join('')}</tr>`).join('')}</table>`}
+function sheetHTML(){const sh=S.sheet,tab=S.sheetTab;
+ const cnt=S.count.status==='submitted'?ITEMS.map(i=>{const p=S.parts[SUP[i.sup].resp];const hs=S.count.hist[i.id]||[];
+  return {seq:S.count.iseq[i.id],c:[SUP[i.sup].name,i.en,i.unit,i.min||'',fmt(S.count.vals[i.id]),hs.length?hs[hs.length-1].by:S.count.by,'25.10 '+(hs.length?hs[hs.length-1].at:S.count.at),p.resp,p.status,p.accBy||'',p.accAt?'25.10 '+p.accAt:'',hs.map(x=>`${fmt(x.from)}→${fmt(x.to)} (${x.by} ${x.at}, asked by ${x.ask})`).join('; ')]}}):[];
+ const tabs={staff:['Staff',sh.staff.length],count:['Sun count',cnt.length],orders:['Orders',sh.orders.length],log:['Log',sh.log.length]};
+ const isNew=k=>(k==='staff'?sh.staff:k==='orders'?sh.orders:k==='log'?sh.log:cnt).some(r=>r.seq===S.seq&&r.seq>0);
+ let h=`<h3>${t('sheet_title')}</h3><div class="muted" style="margin:2px 0 8px">${t('sh_note')}</div><div class="stabs">${Object.keys(tabs).map(k=>`<span class="${tab===k?'on':''}" data-act="sheettab" data-a="${k}">${tabs[k][0]} <em>${tabs[k][1]}</em>${isNew(k)?'<i class="dot"></i>':''}</span>`).join('')}</div><div class="sheetwrap">`;
+ if(tab==='staff')h+=tbl(['Name','Phone','Telegram','Role','Approved by','Date'],sh.staff.map(s=>({seq:s.seq,c:[s.name,s.phone,s.tg,s.role,s.by,s.at]})));
+ if(tab==='count')h+=tbl(['Supplier','Product','Unit','Min','25.10 left','Counted by','Counted at','Reviewer','Status','Accepted by','Accepted at','Changes'],cnt);
+ if(tab==='orders')h+=tbl(['Date','Supplier','Product','Qty','Unit','Ordered by','Saved at','From count','Sent to supplier'],sh.orders.map(o=>({seq:o.seq,c:[o.date,o.sup,o.item,fmt(o.qty),o.unit,o.by,o.at,o.from,'no (v1)']})));
+ if(tab==='log')h+=tbl(['Time','Who','What'],sh.log.slice().reverse().map(l=>({seq:l.seq,c:[l.t,l.who,l.what]})));
+ return h+'</div>'}
+function topHTML(){return `<span class="proto-banner">⚠️ ${t('banner')}</span><span class="muted">${t('viewing')}:</span><div class="roles">${Object.keys(ROLES).map(r=>`<button data-act="role" data-a="${r}" class="${S.role===r?'on':''}">${t('r_'+r)}${S.unread[r]?`<span class="ub">${S.unread[r]}</span>`:''}</button>`).join('')}</div><span class="muted" style="margin-left:auto">${t('lang_app')}:</span>${langSw()}`}
+// ---------- render
+let lastKey='',lastMsgs=0;
+function render(){
+ const r=S.role;const sc=document.querySelector('#phone .scroll');const ch=document.getElementById('chatbox');
+ const key=r+S.view[r]+S.app[r].scr+S.app[r].tab+(S.app[r].arg||'');const prevTop=sc?sc.scrollTop:0,prevChat=ch?ch.scrollTop:0;
+ if(S.view[r]==='chat'&&r==='nazar'&&S.parts.Nazar)S.f.nazarSaw=true;
+ if(S.view[r]==='app'&&r==='maryna'&&S.app.maryna.scr==='review')S.f.marynaReview=true;
+ S.unread[r]=0;
+ document.getElementById('top').innerHTML=topHTML();
+ document.getElementById('steps').innerHTML=stepsHTML();
+ document.getElementById('scr').innerHTML=`<div class="status"><span>${now()}</span><span>●●● 5G ▮</span></div>`+(S.view[r]==='chat'?chatView(r):appView(r));
+ document.getElementById('sheet').innerHTML=sheetHTML();
+ document.getElementById('steps').innerHTML=stepsHTML();
+ const nsc=document.querySelector('#phone .scroll'),nch=document.getElementById('chatbox');
+ if(key===lastKey){if(nsc)nsc.scrollTop=prevTop;if(nch)nch.scrollTop=S.chats[r].length!==lastMsgs?nch.scrollHeight:prevChat}else if(nch)nch.scrollTop=nch.scrollHeight;
+ lastKey=key;lastMsgs=S.chats[r].length;
+ const ci=document.getElementById('chatin');if(ci)ci.focus()}
+// ---------- actions
+const UI=new Set(['role','lang','zone','tab','showall','rctog','rcwho','rvtog','rvwho','suptog','supmore','qminus','qplus','sheettab','step','notyet','back','closeapp','openapp','fillex']);
+function sendRecount(x,by){const p=S.parts[x],dr=p.draft;const k={id:S.tasks.length,resp:x,by,to:dr.who,items:[...dr.items],comment:dr.comment,status:'open',vals:{},at:now()};S.tasks.push(k);
+ p.status='recount';p.rcTo=dr.who;p.chat.stage=null;p.draft=null;W();k.items.forEach(id=>S.count.iseq[id]=S.seq);
+ push(rk(x),'rcsent',{to:k.to,n:k.items.length});
+ log(by,`Asked ${k.to} to recount ${k.items.length} items (${k.items.map(id=>IT[id].en).join(', ')})${k.comment?': “'+k.comment+'”':''}`);
+ if(k.to==='Ana')push('ana','push',{task:k.id});else toast(t('not_emul',k.to))}
+function doAccept(x){const p=S.parts[x];const by=me();p.status='accepted';p.accBy=by;p.accAt=now();p.chat.stage=null;W();itemsOf(x).forEach(i=>S.count.iseq[i.id]=S.seq);
+ S.tasks.forEach(k=>{if(k.resp===x&&k.status==='open')k.status='cancelled'});
+ push(rk(x),'acc',{resp:x});push('ana','accn',{by});log(by,`Accepted the Sunday count (${x}'s part, ${itemsOf(x).length} items)`)}
+function openOrder(x){if(!S.orders[x])S.orders[x]={q:{},open:{continente:false,glad:false},more:{}};const o=S.orders[x];if(o.saved){o.q={};Object.entries(o.saved).forEach(([s,l])=>l.forEach(([id,q])=>o.q[s+'|'+id]=q))}
+ const r=rk(x);S.role=r;S.view[r]='app';S.app[r].scr='order';S.app[r].arg=x;if(x==='Nazar')S.f.orderOpen=true}
+function copyText(x,s){const o=S.orders[x];const lines=o.saved[s].map(([id,q])=>`- ${IT[id].pt}: ${fmt(q).replace('.',',')} ${L.pt['u_'+IT[id].unit]}`);
+ const txt=`Olá! Encomenda The Layers (25.10):\n${lines.join('\n')}\nObrigado!`;window.__lastCopy=txt;
+ let ok=false;try{const ta=document.createElement('textarea');ta.value=txt;document.body.appendChild(ta);ta.select();ok=document.execCommand('copy');ta.remove()}catch(e){}
+ if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(txt).catch(()=>{});
+ S.f.copied=S.f.copied||x==='Nazar';toast(t('copied',SUP[s].name))}
+function act(a,arg){
+ S.wrote=false;if(!UI.has(a))tick(1);const r=S.role;const A=S.app[r];
+ const [x,y]=String(arg||'').split('|');
+ switch(a){
+ case 'role':S.role=arg;break;
+ case 'lang':S.lang=arg;break;
+ case 'step':{const ro=STEPS[+arg][0];S.role=ro;const ix=+arg;
+  if(ix===2||ix===3||ix===4)S.view.ana=S.ana.status==='approved'?'app':'chat';
+  if(ix===7||ix===8)S.view.maryna='app',S.app.maryna.tab='review';break}
+ case 'openapp':if(r==='ana'&&S.ana.status!=='approved'){toast(t('noaccess'));break}S.view[r]='app';if(r==='ana')S.f.anaApp=true;break;
+ case 'closeapp':S.view[r]='chat';break;
+ case 'back':A.scr='home';break;
+ case 'tab':A.tab=arg;A.scr='home';break;
+ case 'notyet':toast(t('not_today'));break;
+ case 'start':S.ana.started=true;push('ana','me',{text:'/start'},true);push('ana','welcome');S.ana.kb=true;break;
+ case 'share':S.ana.kb=false;push('ana','contact',{},true);push('ana','thanks');S.ana.status='shared';S.ana.reqId=push('dmytro','newstaff',{}).id;log('Ana Silva','Shared contact, asked for access (+351 9xx xxx 123, @ana)');break;
+ case 'approve':case 'reject':{if(S.ana.status!=='shared')break;const m=S.chats.dmytro.find(m=>m.id===S.ana.reqId);m.data.res=a==='approve'?'approved':'rejected';m.data.at=now();
+  if(a==='approve'){S.ana.status='approved_pending_role';push('dmytro','pickrole');log('Dmytro','Approved Ana Silva')}
+  else{S.ana.status='rejected';push('ana','rejected');S.ana.kb=true;log('Dmytro','Rejected Ana Silva');S.ana.status='new2'}
+  if(r==='dmytro'&&S.view.dmytro==='app'&&a==='approve'){S.view.dmytro='chat'}break}
+ case 'pickrole':S.ana.role=arg;S.ana.status='approved';S.sheet.staff.push({seq:W(),name:'Ana Silva',phone:'+351 9xx xxx 123',tg:'@ana',role:t('ro_'+arg).replace(/^\S+ /,''),by:'Dmytro',at:'25.10 '+now()});
+  push('dmytro','added',{role:arg});push('ana','approved',{role:arg});log('Dmytro',`Set role ${arg} for Ana Silva → Staff tab`);break;
+ case 'startcount':if(S.count.status==='none'){S.count.status='draft';S.count.by='Ana'}A.scr='count';break;
+ case 'zone':S.count.zone=arg;break;
+ case 'fillex':ITEMS.forEach(i=>{if(S.count.vals[i.id]==null)S.count.vals[i.id]=i.ex});break;
+ case 'submit':{if(filledN()<ITEMS.length)break;S.count.status='submitted';S.count.at=now();W();ITEMS.forEach(i=>S.count.iseq[i.id]=S.seq);
+  RESP.forEach(x=>{S.parts[x]={resp:x,status:'pending',round:1,countedBy:'Ana',chat:{stage:null},draft:null};S.parts[x].lastMsg=push(rk(x),'review',{resp:x,round:1,by:'Ana',vals:{...S.count.vals}}).id});
+  push('ana','sentrev');log('Ana',`Submitted the Sunday count (${ITEMS.length} items) → Nazar ${itemsOf('Nazar').length}, Maryna ${itemsOf('Maryna').length}`);A.scr='home';toast(t('sent_toast'));break}
+ case 'showall':{const m=S.chats[r].find(m=>m.id==arg);m.expanded=!m.expanded;break}
+ case 'accept':doAccept(arg);if(S.view[r]==='app')A.scr='review';break;
+ case 'askrc':{const p=S.parts[arg];p.draft={items:new Set(),comment:'',who:p.countedBy};p.chat.stage='items';p.chat.mid=push(r,'rcitems',{resp:arg}).id;break}
+ case 'rctog':{const p=S.parts[x];p.draft.items.has(y)?p.draft.items.delete(y):p.draft.items.add(y);break}
+ case 'rcnext':{const p=S.parts[arg];if(!p.draft.items.size){toast(t('pick_one'));break}S.chats[r].find(m=>m.id===p.chat.mid).data.sel=[...p.draft.items];p.chat.stage='comment';p.chat.mid=push(r,'rccmt',{resp:arg}).id;break}
+ case 'sendcmt':{const p=S.parts[arg];const v=(document.getElementById('chatin')||{}).value||'';if(!v.trim()){toast(t('type_cmt'));break}push(r,'me',{text:v.trim()},true);p.draft.comment=v.trim();p.chat.stage='who';p.chat.mid=push(r,'rcwho',{resp:arg}).id;break}
+ case 'skipcmt':{const p=S.parts[arg];p.chat.stage='who';p.chat.mid=push(r,'rcwho',{resp:arg}).id;break}
+ case 'rcwho':S.parts[x].draft.who=y;break;
+ case 'rcsend':sendRecount(arg,me());break;
+ case 'openreview':A.scr='review';A.arg=arg;S.view[r]='app';break;
+ case 'rvtog':{const p=S.parts[x];p.draft.items.has(y)?p.draft.items.delete(y):p.draft.items.add(y);break}
+ case 'rvwho':S.parts[x].draft.who=y;break;
+ case 'rvsend':{const p=S.parts[arg];if(!p.draft.items.size){toast(t('pick_one'));break}sendRecount(arg,me());break}
+ case 'openrc':{const k=S.tasks[+arg];if(k.status!=='open')break;S.view.ana='app';S.app.ana.scr='recount';S.app.ana.arg=+arg;S.f.anaRc=true;break}
+ case 'resubmit':{const k=S.tasks[+arg];if(k.items.some(id=>k.vals[id]==null))break;W();const changes=k.items.map(id=>[id,S.count.vals[id],k.vals[id]]);
+  changes.forEach(([id,f,to])=>{(S.count.hist[id]=S.count.hist[id]||[]).push({from:f,to,by:'Ana',at:now(),ask:k.by});S.count.vals[id]=to;S.count.iseq[id]=S.seq});
+  k.status='done';const p=S.parts[k.resp];p.status='pending';p.round++;p.lastMsg=push(rk(k.resp),'review',{resp:k.resp,round:p.round,by:'Ana',changes,vals:{...S.count.vals}}).id;
+  push('ana','backsent',{resp:k.resp});log('Ana',`Resubmitted recount for ${k.resp}: ${changes.map(c=>IT[c[0]].en+' '+fmt(c[1])+'→'+fmt(c[2])).join(', ')}`);A.scr='home';break}
+ case 'makeorder':{const p=S.parts[arg];if(!p||p.status!=='accepted')break;openOrder(arg);break}
+ case 'suptog':{const o=S.orders[x];o.open[y]=o.open[y]===false;break}
+ case 'supmore':{const o=S.orders[x];o.more[y]=!o.more[y];break}
+ case 'qminus':case 'qplus':{const o=S.orders[x];const k=arg.slice(x.length+1);const v=o.q[k]||0;o.q[k]=a==='qplus'?v+1:Math.max(0,v-1);break}
+ case 'saveorder':{const o=S.orders[arg];const snap={};supsOf(arg).forEach(s=>{const l=lowFirst(supItems(s),S.count.vals).filter(i=>o.q[s+'|'+i.id]>0).map(i=>[i.id,o.q[s+'|'+i.id]]);if(l.length)snap[s]=l});
+  if(!Object.keys(snap).length){toast(t('nothing_filled'));break}const re=!!o.saved;W();
+  S.sheet.orders=S.sheet.orders.filter(row=>row.by!==arg);
+  Object.keys(snap).forEach(s=>snap[s].forEach(([id,q])=>S.sheet.orders.push({seq:S.seq,date:'25.10',sup:SUP[s].name,item:IT[id].en,qty:q,unit:IT[id].unit,by:arg,at:'25.10 '+now(),from:'Sun 25.10 (Ana, accepted '+S.parts[arg].accAt+')'})));
+  o.saved=snap;o.savedAt=now();o.mid=push(rk(arg),'os',{resp:arg,by:arg,snap}).id;log(arg,`${re?'Updated':'Saved'} order: ${Object.keys(snap).map(s=>SUP[s].name+' '+snap[s].length).join(', ')} (not sent to suppliers)`);
+  S.view[r]='chat';A.scr='home';break}
+ case 'copy':copyText(x,y);break;
+ case 'sheettab':S.sheetTab=arg;break;
+ case 'reset':{const l=S.lang;init();S.lang=l;break}
+ }render()}
+document.addEventListener('click',e=>{const el=e.target.closest('[data-act]');if(!el)return;act(el.dataset.act,el.dataset.a)});
+document.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target.id==='chatin'){const b=document.querySelector('[data-act="sendcmt"]');if(b)act('sendcmt',b.dataset.a)}});
+document.addEventListener('input',e=>{const el=e.target;
+ if(el.dataset.cnt){const i=IT[el.dataset.cnt],v=pv(el.value);if(v==null)delete S.count.vals[i.id];else S.count.vals[i.id]=v;el.classList.toggle('red',low(i,v));
+  const meta=el.parentNode.querySelector('.meta');if(i.min)meta.innerHTML=`${un(i.unit)} · <span class="${low(i,v)?'low':'min'}">${t('min',i.min)}${low(i,v)?' · '+t('below'):''}</span>`;
+  document.getElementById('ctabs').innerHTML=countTabs();document.getElementById('cfoot').innerHTML=countFoot()}
+ if(el.dataset.rc){const [ix,id]=el.dataset.rc.split('|');const k=S.tasks[+ix],v=pv(el.value);if(v==null)delete k.vals[id];else k.vals[id]=v;el.classList.toggle('red',low(IT[id],v));document.getElementById('rcfoot').innerHTML=rcFoot(k)}
+ if(el.dataset.q){const [x,s,id]=el.dataset.q.split('|');const v=pv(el.value);S.orders[x].q[s+'|'+id]=v||0;document.getElementById('ofoot').innerHTML=oFoot(x)}
+ if(el.id==='rvcomment'){const p=S.parts[el.dataset.a];if(p.draft)p.draft.comment=el.value}});
+window.addEventListener('error',e=>{(window.__errors=window.__errors||[]).push(String(e.message))});
+render();
+
+</script></body></html>
